@@ -16,12 +16,12 @@
 --     0.125 = 1/8 <- Adjustment is made once every 8th o_baud_x16
 --     i_fra_adj = 4'd8
 --
---  A tick of o_baud on the 16th o_baud_x16 tick. Since o_baud_x16 has already
---  been adjusted for the fractional part of its divisor, no separate adjustment
---  is required for o_baud.
+--  A tick of o_baud is asserted on the 16th o_baud_x16 tick. Since o_baud_x16 has 
+--  already been adjusted for the fractional part of its divisor, no separate 
+--  adjustment is required for o_baud.
 ---------------------------------------------------------------------------------
 --
-library IEEE;
+library IEEE; 
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.math_real.ALL;
 use IEEE.std_logic_unsigned.ALL;

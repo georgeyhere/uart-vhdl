@@ -1,4 +1,11 @@
-C:/Users/george/Documents/Aerospace/uart/rtl/uart_baudgen.vhd {1 {vcom -work work -2002 -explicit -stats=none C:/Users/george/Documents/Aerospace/uart/rtl/uart_baudgen.vhd
+C:/Users/george/Documents/Aerospace/uart/tb/uart_baudgen_tb.sv {1 {vlog -work work -sv -stats=none C:/Users/george/Documents/Aerospace/uart/tb/uart_baudgen_tb.sv
+Model Technology ModelSim Microsemi Pro vlog 2021.3 Compiler 2021.07 Jul 14 2021
+-- Compiling module uart_baudgen_tb
+
+Top level modules:
+	uart_baudgen_tb
+
+} {} {}} C:/Users/george/Documents/Aerospace/uart/rtl/uart_baudgen.vhd {1 {vcom -work work -2002 -explicit -stats=none C:/Users/george/Documents/Aerospace/uart/rtl/uart_baudgen.vhd
 Model Technology ModelSim Microsemi Pro vcom 2021.3 Compiler 2021.07 Jul 14 2021
 -- Loading package STANDARD
 -- Loading package TEXTIO
@@ -9,13 +16,6 @@ Model Technology ModelSim Microsemi Pro vcom 2021.3 Compiler 2021.07 Jul 14 2021
 -- Loading package NUMERIC_STD
 -- Compiling entity uart_baudgen
 -- Compiling architecture Behavioral of uart_baudgen
-
-} {} {}} C:/Users/george/Documents/Aerospace/uart/tb/uart_baudgen_tb.sv {1 {vlog -work work -sv -stats=none C:/Users/george/Documents/Aerospace/uart/tb/uart_baudgen_tb.sv
-Model Technology ModelSim Microsemi Pro vlog 2021.3 Compiler 2021.07 Jul 14 2021
--- Compiling module uart_baudgen_tb
-
-Top level modules:
-	uart_baudgen_tb
 
 } {} {}} C:/Users/george/Documents/Aerospace/uart/rtl/uart_top.vhd {1 {vcom -work work -2002 -explicit -stats=none C:/Users/george/Documents/Aerospace/uart/rtl/uart_top.vhd
 Model Technology ModelSim Microsemi Pro vcom 2021.3 Compiler 2021.07 Jul 14 2021
@@ -31,6 +31,13 @@ Model Technology ModelSim Microsemi Pro vcom 2021.3 Compiler 2021.07 Jul 14 2021
 -- Loading entity uart_baudgen
 -- Loading entity uart_tx
 
+} {} {}} C:/Users/george/Documents/Aerospace/uart/tb/uart_tx_tb.sv {1 {vlog -work work -sv -stats=none C:/Users/george/Documents/Aerospace/uart/tb/uart_tx_tb.sv
+Model Technology ModelSim Microsemi Pro vlog 2021.3 Compiler 2021.07 Jul 14 2021
+-- Compiling module uart_tx_tb
+
+Top level modules:
+	uart_tx_tb
+
 } {} {}} C:/Users/george/Documents/Aerospace/uart/rtl/uart_tx.vhd {1 {vcom -work work -2002 -explicit -stats=none C:/Users/george/Documents/Aerospace/uart/rtl/uart_tx.vhd
 Model Technology ModelSim Microsemi Pro vcom 2021.3 Compiler 2021.07 Jul 14 2021
 -- Loading package STANDARD
@@ -42,12 +49,5 @@ Model Technology ModelSim Microsemi Pro vcom 2021.3 Compiler 2021.07 Jul 14 2021
 -- Loading package STD_LOGIC_UNSIGNED
 -- Compiling entity uart_tx
 -- Compiling architecture Behavioral of uart_tx
-
-} {} {}} C:/Users/george/Documents/Aerospace/uart/tb/uart_tx_tb.sv {1 {vlog -work work -sv -stats=none C:/Users/george/Documents/Aerospace/uart/tb/uart_tx_tb.sv
-Model Technology ModelSim Microsemi Pro vlog 2021.3 Compiler 2021.07 Jul 14 2021
--- Compiling module uart_tx_tb
-
-Top level modules:
-	uart_tx_tb
 
 } {} {}}
