@@ -3,11 +3,16 @@ module uart_tx_tb();
 /* TESTBENCH PARAMETERS */
     //`define TEST_PARITY    
     //
+    parameter   F_CLK      = 25_000_000;
     parameter   T_CLK      = 40;
     parameter   DATA_WIDTH = 8;
     //
-    localparam  DIVISOR    = 16'd27;
-    localparam  FRA_ADJ    = 4'd8;
+    localparam  DIVISOR    = 16'd13;
+    localparam  FRA_ADJ    = 4'd2;
+    //
+    localparam  CLKS_PER_BAUD = F_CLK / 115200;
+    //
+    localparam  TIMEOUT_CLKS = 100000;
 
     `ifdef TEST_PARITY
     localparam PARITY_EN   = 1;
@@ -27,6 +32,26 @@ module uart_tx_tb();
     logic                  i_valid;
     logic                  o_busy;
     logic                  o_TX;
+
+    //
+    logic [DATA_WIDTH-1:0] rx_data;
+    logic                  rx_valid;
+    logic                  rx_tick;
+
+    assign rx_tick = (uart_rx_ref.baudCounter == 0);
+
+/* REFERENCE UART RX */
+    ref_uart_rx 
+    #(.CLKS_PER_BAUD (CLKS_PER_BAUD))
+    uart_rx_ref(
+    .i_clk       (i_clk),
+    .i_rstn      (i_rstn),
+    // 
+    .i_rx        (o_TX),
+    // 
+    .o_rx_data   (rx_data),
+    .o_rx_dvalid (rx_valid)
+    );
 
 /* DUT INSTANTIATION */
 
@@ -76,8 +101,23 @@ module uart_tx_tb();
             end
             // deassert input valid
             @(posedge i_clk) i_valid <= 0;
-            wait(!o_busy);
             @(posedge i_clk);
+            
+
+            for(int i=0; i<TIMEOUT_CLKS; i++) begin
+                @(posedge i_clk) begin
+                    if(rx_valid) begin
+                        $display("TX sends: %b || RX receives: %b", txData, rx_data);
+                        wait(!o_busy);
+                        break;
+                    end
+                    if(i==TIMEOUT_CLKS-1) begin
+                        $display("TX failed to send valid data!");
+                        $stop();
+                        break;
+                    end
+                end
+            end
         end
     endtask
 
@@ -95,6 +135,8 @@ module uart_tx_tb();
         sendFrame(8'b00110111);
         sendFrame(8'b0);
         sendFrame(8'hFF);
+        //
+        $stop();
     end
 
 /* ASSERTS */

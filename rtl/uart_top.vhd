@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity uart is
+entity uart is 
 generic (
 	DATA_WIDTH            : integer := 8;
 	PARITY_EN             : integer := 0;
@@ -21,15 +21,15 @@ port (
 	i_valid     : in  std_logic;
 
 	-- RX DATA INTERFACE
-	--o_dout      : out std_logic_vector (DATA_WIDTH-1 downto 0);
-	--o_valid     : out std_logic;
+	o_dout      : out std_logic_vector (DATA_WIDTH-1 downto 0);
+	o_valid     : out std_logic;
 
 	-- CONTROL AND STATUS
 	i_parity_en : in  std_logic;
 	o_busy      : out std_logic;
 
 	-- UART INTERFACE
-	--i_RX        : in  std_logic;
+	i_RX        : in  std_logic;
 	o_TX        : out std_logic
 );
 
