@@ -2,9 +2,7 @@
 --
 -- UART RX w/ parameterizable data width and optional parity bit. Only supports one stop bit.
 --
--- o_error:
---    [0] -> '1' when a stop bit was missed. Held until return to STATE_IDLE.
---    [1] -> '1' when a parity check is failed, else '0'.
+-- When a byte is received, o_valid is asserted for one cycle.
 --
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -23,8 +21,8 @@ port (
     i_baud_x16 : in  std_logic; -- 16x baud tick for RX sampling
     
     -- RX data and valid
-    o_dout     : out std_logic_vector (DATA_WIDTH-1 downto 0); 
-    o_valid    : out std_logic;
+    o_dout     : out std_logic_vector (DATA_WIDTH-1 downto 0); -- data out
+    o_valid    : out std_logic; -- data out valid, asserted for one cycle after transaction
 
     -- Status
     o_error    : out std_logic_vector (1 downto 0); 
@@ -37,7 +35,7 @@ end uart_rx;
 --
 architecture Behavioral of uart_rx is
     -- 
-    constant FRAME_WIDTH     : integer := DATA_WIDTH + 2 + PARITY_EN; 
+    constant FRAME_WIDTH : integer := DATA_WIDTH + 2 + PARITY_EN; 
 
     -- FSM state enumeration w/ one-hot encoding
     type t_fsm_state is (STATE_IDLE, STATE_START, STATE_ACTIVE, STATE_STOP);
@@ -96,18 +94,20 @@ begin
                 case STATE is 
 
                 -- STATE_IDLE:
-                -- When q2_RX goes low, go to STATE_START.
+                --> When q2_RX goes low, go to STATE_START.
                     when STATE_IDLE =>
                         baud_count <= 0;
                         rx_count   <= 0;
+                        o_valid    <= '0';
                         rx_data    <= (others => '0');
                         if (q2_RX = '0') then
-                            o_valid <= '0';
                             STATE   <= STATE_START;
                         end if;
 
                 -- STATE_START:
-                -- Check that q2_RX remains low for at 8 sampling baud ticks.
+                --> Check that q2_RX remains low for at 8 sampling baud ticks.
+                --> If q2_RX does not remain low for 8 ticks, the start condition is rejected
+                --  and the FSM returns to STATE_IDLE.
                     when STATE_START =>
                         if(i_baud_x16 = '1') then
                             if(baud_count = 7) then
@@ -122,7 +122,8 @@ begin
                         end if;
 
                 -- STATE_ACTIVE:
-                -- Sample and shift in q2_RX once every 16 sampling baud ticks.
+                --> Sample and shift in q2_RX once every 16 sampling baud ticks.
+                --> If applicable, check for odd parity bit and set o_error(1) accordingly.
                     when STATE_ACTIVE =>
                         if(i_baud_x16 = '1') then
                             if(baud_count = 15) then
@@ -143,7 +144,9 @@ begin
                         end if;
 
                 -- STATE_STOP:
-                -- Look for stop bit. 
+                --> Look for stop bit, return to STATE_IDLE regardless of result.
+                --> If no stop bit, set o_error(0).
+                --> Set output data and valid.
                     when STATE_STOP =>
                         if(i_baud_x16 = '1') then
                             if(baud_count = 15) then
