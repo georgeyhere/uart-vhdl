@@ -4,22 +4,22 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity uart is 
 generic (
-	DATA_WIDTH            : integer := 8;  -- UART data width
-	TX_PARITY_EN          : integer := 0;  -- '1' enables odd parity bit gen 
+    DATA_WIDTH            : integer := 8;  -- UART data width
+    TX_PARITY_EN          : integer := 0;  -- '1' enables odd parity bit gen 
     RX_PARITY_EN          : integer := 0;  -- '1' enables odd parity bit checking
-	BAUDGEN_COUNTER_WIDTH : integer := 20; -- counter width for baud gen clock divider; adjust based on i_clk
+    BAUDGEN_COUNTER_WIDTH : integer := 20; -- counter width for baud gen clock divider; adjust based on i_clk
     FIFO_ADDR_WIDTH       : integer := 8   -- TX and RX FIFO address width; determines FIFO depths
 );
 port (
-	-- SYSTEM
-	i_clk             : in  std_logic;                                -- system clock
-	i_rstn            : in  std_logic;                                -- synchronous active-low reset
-	
-	-- BAUD GEN CONFIG
-	i_divisor         : in  std_logic_vector (15 downto 0);           -- 16x f clock divider divisor
-	i_fra_adj         : in  std_logic_vector (3  downto 0);           -- fractional adjustment bits
-	
-	-- TX FIFO INTERFACE
+    -- SYSTEM
+    i_clk             : in  std_logic;                                -- system clock
+    i_rstn            : in  std_logic;                                -- synchronous active-low reset
+    
+    -- BAUD GEN CONFIG
+    i_divisor         : in  std_logic_vector (15 downto 0);           -- 16x f clock divider divisor
+    i_fra_adj         : in  std_logic_vector (3  downto 0);           -- fractional adjustment bits
+    
+    -- TX FIFO INTERFACE
     i_tx_wr           : in  std_logic;                                -- tx fifo write enable
     i_tx_data         : in  std_logic_vector (DATA_WIDTH-1 downto 0); -- tx fifo data in 
     o_tx_full         : out std_logic;                                -- tx fifo full flag
@@ -39,9 +39,9 @@ port (
     o_fifo_tx_overrun : out unsigned (3 downto 0);                    -- counts # of TX FIFO overruns
     o_fifo_rx_overrun : out unsigned (3 downto 0);                    -- counts # of RX FIFO overruns
 
-	-- UART INTERFACE
-	i_RX              : in  std_logic; 
-	o_TX              : out std_logic
+    -- UART INTERFACE
+    i_RX              : in  std_logic; 
+    o_TX              : out std_logic
 );
 
 end uart;
@@ -50,9 +50,9 @@ architecture Behavioral of uart is
     -- Constants
     constant FIFO_DEPTH : integer := 2**FIFO_ADDR_WIDTH;
 
-	-- Baud Ticks
-	signal baud_tick            : std_logic; 
-	signal baud_tick_x16        : std_logic; 
+    -- Baud Ticks
+    signal baud_tick            : std_logic; 
+    signal baud_tick_x16        : std_logic; 
 
     -- TX UART
     signal uart_tx_busy         : std_logic;                               
@@ -125,20 +125,20 @@ begin
 
     -- Baud Generator
     --> Generates baud and 16x baud ticks for TX and RX UARTs.
-	baudGen : entity work.uart_baudgen (Behavioral)
-	GENERIC MAP (
-	COUNTER_WIDTH => BAUDGEN_COUNTER_WIDTH
-	)
-	PORT MAP (
-	i_clk      => i_clk,
-	i_rstn     => i_rstn,
-	--
-	i_divisor  => i_divisor,
-	i_fra_adj  => i_fra_adj,
-	--
-	o_baud     => baud_tick,
-	o_baud_x16 => baud_tick_x16
-	);
+    baudGen : entity work.uart_baudgen (Behavioral)
+    GENERIC MAP (
+    COUNTER_WIDTH => BAUDGEN_COUNTER_WIDTH
+    )
+    PORT MAP (
+    i_clk      => i_clk,
+    i_rstn     => i_rstn,
+    --
+    i_divisor  => i_divisor,
+    i_fra_adj  => i_fra_adj,
+    --
+    o_baud     => baud_tick,
+    o_baud_x16 => baud_tick_x16
+    );
 
     -- TX FIFO
     --> Serves as an input buffer for TX UART
@@ -169,21 +169,21 @@ begin
 
     -- UART TX Module
     --> TX data provided by TX UART whenever data is present and UART TX is not busy.
-	uart_tx : entity work.uart_tx (Behavioral)
+    uart_tx : entity work.uart_tx (Behavioral)
     GENERIC MAP (
     DATA_WIDTH => DATA_WIDTH,
     PARITY_EN  => TX_PARITY_EN
     )
-	PORT MAP (
-	i_clk    => i_clk,
-	i_rstn   => i_rstn,
-	i_baud   => baud_tick,    -- Baud tick
-	--
-	i_din    => fifo_tx_dout, -- TX data in from TX FIFO
-	i_valid  => fifo_tx_rd,   -- Valid on TX FIFO read
-	--
-	o_busy   => uart_tx_busy  -- asserted when a transaction is in progress
-	);
+    PORT MAP (
+    i_clk    => i_clk,
+    i_rstn   => i_rstn,
+    i_baud   => baud_tick,    -- Baud tick
+    --
+    i_din    => fifo_tx_dout, -- TX data in from TX FIFO
+    i_valid  => fifo_tx_rd,   -- Valid on TX FIFO read
+    --
+    o_busy   => uart_tx_busy  -- asserted when a transaction is in progress
+    );
 
     -- RX FIFO
     --> Writes driven directly by UART RX whenever it has valid data out.
