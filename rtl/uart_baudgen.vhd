@@ -32,88 +32,126 @@ generic(
 	COUNTER_WIDTH : integer := 20 -- adjust accordingly for system clock 
 );
 port (
-	i_clk      : in std_logic; -- system clock
-	i_rstn     : in std_logic; -- synchronous active-low reset 
-	--
-	i_divisor  : in std_logic_vector (15 downto 0); -- integer part of DIVISOR_x16 (F_CLK / (Baud Rate * 16)) 
-	i_fra_adj  : in std_logic_vector (3  downto 0); -- fractional adjustment for DIVISOR_x16
-	--
-	o_baud     : out std_logic; -- Baud Tick (TX)
-	o_baud_x16 : out std_logic  -- 16x Baud Tick (RX)
+	i_clk          : in  std_logic; -- system clock
+	i_rstn         : in  std_logic; -- synchronous active-low reset 
+	-- 
+	i_divisor_x16  : in  integer range 0 to 2**16-1; -- integer part of DIVISOR_x16 (F_CLK / (Baud Rate * 16)) 
+	i_fra_adj_x16  : in  integer range 0 to 15; -- fractional adjustment for DIVISOR_x16
+	-- 
+    i_divisor      : in  integer range 0 to 2**16-1;
+    i_fra_adj      : in  integer range 0 to 15;
+    --
+    i_baud_en      : in  std_logic;
+    i_baud_x16_en  : in  std_logic;
+    --
+	o_baud         : out std_logic; -- 2x Baud Tick (TX)
+	o_baud_x16     : out std_logic  -- 16x Baud Tick (RX)
 );
 end uart_baudgen;
 
 --
 architecture Behavioral of uart_baudgen is 
 	-- counter for 16x baud rate tick gen 
-	signal count_baudx16 : std_logic_vector (COUNTER_WIDTH-1 downto 0);
-	signal baud_x16      : std_logic;
+	--signal count_baudx16 : std_logic_vector (COUNTER_WIDTH-1 downto 0);
+    signal count_baudx16 : integer range 0 to 2**COUNTER_WIDTH-1;
+	signal baudx16       : std_logic;
 
 	-- 4-bit counter for 16x baud rate tick fractional adjustment
-	signal count_fra_adj : std_logic_vector (3 downto 0);
+	--signal count_fra_adjx16 : std_logic_vector (3 downto 0);
+    signal count_fra_adjx16 : integer range 0 to 15;
 
-	-- 4-bit counter for baud rate tick gen
-	signal count_baud : std_logic_vector (3 downto 0);
+	-- counter for 2x baud rate tick gen 
+	--signal count_baud      : std_logic_vector (COUNTER_WIDTH-1 downto 0);
+    signal count_baud      : integer range 0 to COUNTER_WIDTH**2-1;
+	signal baud            : std_logic;
+
+	-- 4-bit counter for 1x baud rate tick fractional adjustment
+	--signal count_fra_adj : std_logic_vector (3 downto 0);
+    signal count_fra_adj  : integer range 0 to 15;
 begin
 
 -- Process to generate 16x Baud Rate ticks w/ fractional adjustment
 	BAUD_X16_GEN: process(i_clk) 
 	begin
 		if rising_edge(i_clk) then
-			if (i_rstn = '0') then
-				baud_x16      <= '0';
-				count_baudx16 <= (others => '0');
-				count_fra_adj <= (others => '0');
+			if (i_rstn = '0' or i_baud_x16_en = '0') then
+				baudx16          <= '0';
+				count_baudx16    <= 0;
+				count_fra_adjx16 <= 0;
 			else
 				-- Count # of o_baud_x16 periods
-				if (baud_x16 = '1') then
-					if (count_fra_adj = i_fra_adj) then
-						count_fra_adj <= (others => '0');
+				if (baudx16 = '1') then
+					if (count_fra_adjx16 = i_fra_adj_x16) then
+						count_fra_adjx16 <= 0;
 					else 
-						count_fra_adj <= count_fra_adj + "1";
+                        count_fra_adjx16 <= count_fra_adjx16 + 1;
 					end if;
 				end if;
 
 				-- Adjust for fractional part of DIVISOR_x16 by reducing the
 				-- error through averaging of o_baud_x16 periods
-				if (count_baudx16 = "0") then
-					if (count_fra_adj = i_fra_adj) then -- adjustment made once every i_fra_adj clock periods
-						count_baudx16 <= std_logic_vector(resize(unsigned(i_divisor), count_baudx16'length)) + "1";
-					else 
-						count_baudx16 <= std_logic_vector(resize(unsigned(i_divisor), count_baudx16'length));
-					end if;
-					baud_x16 <= '1';
-				else 
-					count_baudx16 <= count_baudx16 - "1";
-					baud_x16 <= '0';
-				end if;
-				
+                if(count_fra_adjx16 = i_fra_adj_x16) then
+                    if(count_baudx16 >= i_divisor_x16+1) then
+                        count_baudx16 <= 0;
+                        baudx16       <= '1';
+                    else
+                        count_baudx16 <= count_baudx16 + 1;
+                        baudx16       <= '0';
+                    end if;
+                else
+                    if(count_baudx16 >= i_divisor_x16) then
+                        count_baudx16 <= 0;
+                        baudx16       <= '1';
+                    else
+                        count_baudx16 <= count_baudx16 + 1;
+                        baudx16       <= '0';
+                    end if;
+                end if;        
 			end if;
 		end if;
 	end process;
-	o_baud_x16 <= baud_x16;
+	o_baud_x16 <= baudx16;
 
--- Process to generate a Baud Rate tick every 16 16x Baud Rate ticks
-	BAUD_GEN: process(i_clk)
-	begin
+-- Process to generate a Baud Rate tick 
+    BAUD_GEN: process(i_clk) 
+    begin
 		if rising_edge(i_clk) then
-			if (i_rstn = '0') then
-				o_baud     <= '0';
-				count_baud <= (others => '0');
-			else 
-				if (count_baudx16 = "0") then
-					if(count_baud = 15) then -- assert a tick of o_baud every 16 o_baud_x16 periods
-						count_baud <= (others => '0');
-						o_baud     <= '1';
-					else
-						count_baud <= count_baud + "1";
-						o_baud     <= '0';
-					end if;	
-				else 
-					o_baud <= '0';
+			if (i_rstn = '0' or i_baud_en = '0') then
+				baud          <= '0';
+				count_baud    <= 0;
+				count_fra_adj <= 0;
+			else
+				-- Count # of o_baud_x2 periods
+				if (baud = '1') then
+					if (count_fra_adj = i_fra_adj) then
+						count_fra_adj <= 0;
+					else 
+                        count_fra_adj <= count_fra_adj + 1;
+					end if;
 				end if;
+
+				-- Adjust for fractional part of DIVISOR by reducing the
+				-- error through averaging of o_baud periods
+                if(count_fra_adj = i_fra_adj) then
+                    if(count_baud >= i_divisor+1) then
+                        count_baud <= 0;
+                        baud       <= '1';
+                    else
+                        count_baud <= count_baud + 1;
+                        baud       <= '0';
+                    end if;
+                else
+                    if(count_baud >= i_divisor) then
+                        count_baud <= 0;
+                        baud       <= '1';
+                    else
+                        count_baud <= count_baud + 1;
+                        baud       <= '0';
+                    end if;
+                end if;
 			end if;
 		end if;
 	end process;
+    o_baud <= baud;
 
 end Behavioral;

@@ -11,24 +11,24 @@ z2
 cModel Technology
 dC:/Microsemi/Libero_SoC_v2021.3/ModelSimPro/win32acoem
 Efifo_sync
-Z0 w1650605743
+Z0 w1650841242
 Z1 DPx4 ieee 9 math_real 0 22 gNk<PdFJ<XNPcfef`f?Z81
 Z2 DPx4 ieee 11 numeric_std 0 22 aU^R8eGcicLcUFIaBQSL>3
 Z3 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
 Z4 DPx4 ieee 14 std_logic_1164 0 22 cVAk:aDinOX8^VGI1ekP<3
-!i122 370
+!i122 943
 Z5 dC:/Users/george/Documents/Aerospace/uart/uart_ms
 Z6 8C:/Users/george/Documents/Aerospace/uart/rtl/fifo_sync.vhd
 Z7 FC:/Users/george/Documents/Aerospace/uart/rtl/fifo_sync.vhd
 l0
 L6 1
-V7ab@cDE_3kfUNWioljCa]3
-!s100 k[L8fUmYgFT6AR]@_h<3V1
+V@n1B:]OkDK_J72<Y9Tiio0
+!s100 YA?;i4@^X5jdN;BbNB:TU1
 Z8 OW;C;2021.3;73
 32
-Z9 !s110 1650605745
+Z9 !s110 1650857293
 !i10b 1
-Z10 !s108 1650605745.000000
+Z10 !s108 1650857293.000000
 Z11 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/george/Documents/Aerospace/uart/rtl/fifo_sync.vhd|
 Z12 !s107 C:/Users/george/Documents/Aerospace/uart/rtl/fifo_sync.vhd|
 !i113 1
@@ -39,12 +39,12 @@ R1
 R2
 R3
 R4
-Z15 DEx4 work 9 fifo_sync 0 22 7ab@cDE_3kfUNWioljCa]3
-!i122 370
+Z15 DEx4 work 9 fifo_sync 0 22 @n1B:]OkDK_J72<Y9Tiio0
+!i122 943
 l54
 L33 132
-Vd6j:;fK9W18D36hRN`:He3
-!s100 MVM@if1?zbKE=lgjX_GPV3
+VN1SnJNeTJWm?hDYIYVZ_21
+!s100 [;NHSzA68GCXEU<n`_gIR3
 R8
 32
 R9
@@ -57,7 +57,7 @@ R13
 R14
 vfifo_sync_tb
 Z16 DXx6 sv_std 3 std 0 22 VYECXdT12H8WgbUP_5Y6:3
-!s110 1650605951
+R9
 !i10b 1
 !s100 3RH>[ISM`i`1c>LLR1:U]2
 I3YlcU6N9PQ@e:AI^RWc3c2
@@ -66,14 +66,14 @@ R5
 w1650605949
 8C:/Users/george/Documents/Aerospace/uart/tb/fifo_sync_tb.sv
 FC:/Users/george/Documents/Aerospace/uart/tb/fifo_sync_tb.sv
-!i122 371
+!i122 944
 L0 1 199
 Z17 VDg1SIo80bB@j0V0VzS_@n1
 Z18 OW;L;2021.3;73
 r1
 !s85 0
 31
-!s108 1650605951.000000
+R10
 !s107 C:/Users/george/Documents/Aerospace/uart/tb/fifo_sync_tb.sv|
 !s90 -reportprogress|300|-work|work|-sv|-stats=none|C:/Users/george/Documents/Aerospace/uart/tb/fifo_sync_tb.sv|
 !s101 -O0
@@ -82,7 +82,7 @@ Z19 o-work work -sv -O0
 Z20 tCvgOpt 0
 vref_uart_rx
 R16
-!s110 1650389070
+R9
 !i10b 1
 !s100 BNG??K7PWhU=EomfNW5SX0
 I6<=O>JfE8dBaaZ^iJDe;:3
@@ -91,14 +91,14 @@ R5
 w1650389067
 8C:/Users/george/Documents/Aerospace/uart/tb/ref_uart_rx.sv
 FC:/Users/george/Documents/Aerospace/uart/tb/ref_uart_rx.sv
-!i122 161
+!i122 941
 L0 13 122
 R17
 R18
 r1
 !s85 0
 31
-!s108 1650389070.000000
+R10
 !s107 C:/Users/george/Documents/Aerospace/uart/tb/ref_uart_rx.sv|
 !s90 -reportprogress|300|-work|work|-sv|-stats=none|C:/Users/george/Documents/Aerospace/uart/tb/ref_uart_rx.sv|
 !s101 -O0
@@ -131,123 +131,123 @@ r1
 R19
 R20
 Euart
-Z21 w1650612091
+Z21 w1650841134
 R2
 R3
 R4
-!i122 386
+!i122 939
 R5
 Z22 8C:/Users/george/Documents/Aerospace/uart/rtl/uart_top.vhd
 Z23 FC:/Users/george/Documents/Aerospace/uart/rtl/uart_top.vhd
 l0
 L5 1
-VFPlUZQT:R1h0SmW3TWZh`3
-!s100 bOaBF5P[>OoTzDdI3ak2Q2
+V;<e[>Ho1<Wo2]h5Uh3MCo3
+!s100 [f;^N3W^214XKFTHHX0:^3
 R8
 32
-Z24 !s110 1650612370
+Z24 !s110 1650857292
 !i10b 1
-Z25 !s108 1650612370.000000
+Z25 !s108 1650857292.000000
 Z26 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/george/Documents/Aerospace/uart/rtl/uart_top.vhd|
 Z27 !s107 C:/Users/george/Documents/Aerospace/uart/rtl/uart_top.vhd|
 !i113 1
 R13
 R14
 Abehavioral
-Z28 DEx4 work 7 uart_rx 0 22 <]dUSo^_8CVFJKSDWbE;]2
-Z29 DEx4 work 7 uart_tx 0 22 nWE>d]^hPU9i0W1SPnO]:0
+DEx4 work 7 uart_rx 0 22 7V`::>hdNigieMhBU^mc91
+DEx4 work 7 uart_tx 0 22 nWE>d]^hPU9i0W1SPnO]:0
 R15
-Z30 DPx4 ieee 15 std_logic_arith 0 22 [G314=:2zXJ`VORJe1J@Z1
-Z31 DPx4 ieee 18 std_logic_unsigned 0 22 ;eZjO2D4ZDz<]0>8AL<ne1
+Z28 DPx4 ieee 15 std_logic_arith 0 22 [G314=:2zXJ`VORJe1J@Z1
+Z29 DPx4 ieee 18 std_logic_unsigned 0 22 ;eZjO2D4ZDz<]0>8AL<ne1
 R1
-Z32 DEx4 work 12 uart_baudgen 0 22 fc8KP6J_5FSW4l6DCLz;31
+DEx4 work 12 uart_baudgen 0 22 fc8KP6J_5FSW4l6DCLz;31
 R2
 R3
 R4
-DEx4 work 4 uart 0 22 FPlUZQT:R1h0SmW3TWZh`3
-!i122 386
-l77
-L49 187
-VXg9n[Qj_I`6]l04[N04>l2
-!s100 `475EbJK@Y;R@hKCMK5O60
+DEx4 work 4 uart 0 22 ;<e[>Ho1<Wo2]h5Uh3MCo3
+!i122 634
+l80
+L49 194
+VL9L@bJYcEeaR4Jl1LV1Em0
+!s100 aX22V9M_V]g7hPLW]XPBd1
 R8
 32
-R24
+!s110 1650841410
 !i10b 1
-R25
+!s108 1650841410.000000
 R26
 R27
 !i113 1
 R13
 R14
 Euart_baudgen
-Z33 w1649100647
+Z30 w1650856826
 R2
-R30
-R31
+R28
+R29
 R1
 R3
 R4
-!i122 105
+!i122 936
 R5
-Z34 8C:/Users/george/Documents/Aerospace/uart/rtl/uart_baudgen.vhd
-Z35 FC:/Users/george/Documents/Aerospace/uart/rtl/uart_baudgen.vhd
+Z31 8C:/Users/george/Documents/Aerospace/uart/rtl/uart_baudgen.vhd
+Z32 FC:/Users/george/Documents/Aerospace/uart/rtl/uart_baudgen.vhd
 l0
 L30 1
-Vfc8KP6J_5FSW4l6DCLz;31
-!s100 lFfAU_QaH5VGdh3[iMl:51
+V^b9iGcH8Q^mI9MXahT71h2
+!s100 Q;_=JTf9oA58izSmo7MDP2
 R8
 32
-Z36 !s110 1650386533
+R24
 !i10b 1
-Z37 !s108 1650386533.000000
-Z38 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/george/Documents/Aerospace/uart/rtl/uart_baudgen.vhd|
-Z39 !s107 C:/Users/george/Documents/Aerospace/uart/rtl/uart_baudgen.vhd|
+R25
+Z33 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/george/Documents/Aerospace/uart/rtl/uart_baudgen.vhd|
+Z34 !s107 C:/Users/george/Documents/Aerospace/uart/rtl/uart_baudgen.vhd|
 !i113 1
 R13
 R14
 Abehavioral
 R2
-R30
-R31
+R28
+R29
 R1
 R3
 R4
-R32
-!i122 105
-l57
-L47 73
-VH<P:gUdD6hYI9e:<Uk5[g1
-!s100 `YgFh1zK0ZJb_@`jlkY1P0
+DEx4 work 12 uart_baudgen 0 22 ^b9iGcH8Q^mI9MXahT71h2
+!i122 936
+l71
+L53 105
+VDDWBd9PF99bLzCdQZVJKe3
+!s100 iQejjVL_LlYbSdFP]ZEdJ3
 R8
 32
-R36
+R24
 !i10b 1
-R37
-R38
-R39
+R25
+R33
+R34
 !i113 1
 R13
 R14
 vuart_baudgen_tb
 R16
-!s110 1648934416
+R24
 !i10b 1
-!s100 ol<zlRNf=f0ea:aJR`XVU1
-Ii>oR[B@d`W]F`?N>?_H>d3
+!s100 iN3MQXE@?a3ORgk31VcZH0
+IECBeJ]1U0H;fFj5m8U::l1
 S1
 R5
-w1648934398
+w1650854506
 8C:/Users/george/Documents/Aerospace/uart/tb/uart_baudgen_tb.sv
 FC:/Users/george/Documents/Aerospace/uart/tb/uart_baudgen_tb.sv
-!i122 84
-L0 1 85
+!i122 938
+L0 1 108
 R17
 R18
 r1
 !s85 0
 31
-!s108 1648934416.000000
+R25
 !s107 C:/Users/george/Documents/Aerospace/uart/tb/uart_baudgen_tb.sv|
 !s90 -reportprogress|300|-work|work|-sv|-stats=none|C:/Users/george/Documents/Aerospace/uart/tb/uart_baudgen_tb.sv|
 !s101 -O0
@@ -255,147 +255,172 @@ r1
 R19
 R20
 Euart_rx
-Z40 w1650611666
+Z35 w1650857291
 R1
 R2
-R30
-R31
+R28
+R29
 R3
 R4
-!i122 385
+!i122 940
 R5
-Z41 8C:/Users/george/Documents/Aerospace/uart/rtl/uart_rx.vhd
-Z42 FC:/Users/george/Documents/Aerospace/uart/rtl/uart_rx.vhd
+Z36 8C:/Users/george/Documents/Aerospace/uart/rtl/uart_rx.vhd
+Z37 FC:/Users/george/Documents/Aerospace/uart/rtl/uart_rx.vhd
 l0
 L13 1
-V<]dUSo^_8CVFJKSDWbE;]2
-!s100 F14K4oRfJ_Smo6PIRSLLi0
+V8K7XU8TW[n2S]?B;a6g3^3
+!s100 nLDG8Q8<VEj7G@<Ob5QeZ3
 R8
 32
-Z43 !s110 1650611900
+R9
 !i10b 1
-Z44 !s108 1650611900.000000
-Z45 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/george/Documents/Aerospace/uart/rtl/uart_rx.vhd|
-Z46 !s107 C:/Users/george/Documents/Aerospace/uart/rtl/uart_rx.vhd|
+R10
+Z38 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/george/Documents/Aerospace/uart/rtl/uart_rx.vhd|
+Z39 !s107 C:/Users/george/Documents/Aerospace/uart/rtl/uart_rx.vhd|
 !i113 1
 R13
 R14
 Abehavioral
 R1
 R2
-R30
-R31
+R28
+R29
 R3
 R4
-R28
-!i122 385
-l60
-L36 141
-Vm[G;>ZDViDbadlRP_kFeS1
-!s100 UW8mE0j<jVBB9f:OT`O6g0
+DEx4 work 7 uart_rx 0 22 8K7XU8TW[n2S]?B;a6g3^3
+!i122 940
+l63
+L39 144
+VE;RN6hkMk[3AcloOfmz4G1
+!s100 dnT<V[`PaOab9m60OO8hj3
 R8
 32
-R43
+R9
 !i10b 1
-R44
-R45
-R46
+R10
+R38
+R39
 !i113 1
 R13
 R14
 vuart_rx_tb
 R16
-!s110 1650399317
+R9
 !i10b 1
-!s100 YU>_nHYe`d<gci@O>FYP=3
-Ibgcl4Y5k2TgFKGENMMJ<:0
+!s100 UcE@I=e3XO2M@o7FhgXcb2
+Ih=[i8aHK;Q[ODh^GUa`?T3
 S1
 R5
-w1650396136
+w1650855426
 8C:/Users/george/Documents/Aerospace/uart/tb/uart_rx_tb.sv
 FC:/Users/george/Documents/Aerospace/uart/tb/uart_rx_tb.sv
-!i122 223
-L0 1 150
+!i122 942
+L0 1 164
 R17
 R18
 r1
 !s85 0
 31
-!s108 1650399317.000000
+R10
 !s107 C:/Users/george/Documents/Aerospace/uart/tb/uart_rx_tb.sv|
 !s90 -reportprogress|300|-work|work|-sv|-stats=none|C:/Users/george/Documents/Aerospace/uart/tb/uart_rx_tb.sv|
 !s101 -O0
 !i113 1
 R19
 R20
-Euart_tx
-Z47 w1650389026
-R30
-R31
-R1
-R2
-R3
-R4
-!i122 158
-R5
-Z48 8C:/Users/george/Documents/Aerospace/uart/rtl/uart_tx.vhd
-Z49 FC:/Users/george/Documents/Aerospace/uart/rtl/uart_tx.vhd
-l0
-L11 1
-VnWE>d]^hPU9i0W1SPnO]:0
-!s100 XdAK>^SWK81YgZL2`56XR1
-R8
-32
-Z50 !s110 1650389040
-!i10b 1
-Z51 !s108 1650389040.000000
-Z52 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/george/Documents/Aerospace/uart/rtl/uart_tx.vhd|
-Z53 !s107 C:/Users/george/Documents/Aerospace/uart/rtl/uart_tx.vhd|
-!i113 1
-R13
-R14
-Abehavioral
-R30
-R31
-R1
-R2
-R3
-R4
-R29
-!i122 158
-l59
-L35 93
-VZA2104D<GofziMGT`bK^i2
-!s100 :04PWKB5ZemD[7A3zOSZF2
-R8
-32
-R50
-!i10b 1
-R51
-R52
-R53
-!i113 1
-R13
-R14
-vuart_tx_tb
+vuart_top_tb
 R16
-!s110 1650391416
+R9
 !i10b 1
-!s100 ;o]QLY0E3PbRF@feZF[cL2
-IYkAYZ>Wn9R2Q6dZM7f<aY0
+!s100 9AC4C90j:clSizh2@m6[F3
+IaM>gcT6?JoYP`;Y1DUjlS1
 S1
 R5
-w1650391395
-8C:/Users/george/Documents/Aerospace/uart/tb/uart_tx_tb.sv
-FC:/Users/george/Documents/Aerospace/uart/tb/uart_tx_tb.sv
-!i122 173
-L0 1 170
+w1650841403
+8C:/Users/george/Documents/Aerospace/uart/tb/uart_top_tb.sv
+FC:/Users/george/Documents/Aerospace/uart/tb/uart_top_tb.sv
+!i122 945
+L0 1 256
 R17
 R18
 r1
 !s85 0
 31
-!s108 1650391416.000000
+R10
+!s107 C:/Users/george/Documents/Aerospace/uart/tb/uart_top_tb.sv|
+!s90 -reportprogress|300|-work|work|-sv|-stats=none|C:/Users/george/Documents/Aerospace/uart/tb/uart_top_tb.sv|
+!s101 -O0
+!i113 1
+R19
+R20
+Euart_tx
+Z40 w1650855697
+R28
+R29
+R1
+R2
+R3
+R4
+!i122 935
+R5
+Z41 8C:/Users/george/Documents/Aerospace/uart/rtl/uart_tx.vhd
+Z42 FC:/Users/george/Documents/Aerospace/uart/rtl/uart_tx.vhd
+l0
+L11 1
+VQH:J[JYKeIAbT=nKT_;Ff3
+!s100 LDPU3;=CC4n7ROGW7`][k1
+R8
+32
+R24
+!i10b 1
+R25
+Z43 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/george/Documents/Aerospace/uart/rtl/uart_tx.vhd|
+Z44 !s107 C:/Users/george/Documents/Aerospace/uart/rtl/uart_tx.vhd|
+!i113 1
+R13
+R14
+Abehavioral
+R28
+R29
+R1
+R2
+R3
+R4
+DEx4 work 7 uart_tx 0 22 QH:J[JYKeIAbT=nKT_;Ff3
+!i122 935
+l60
+L38 95
+V?icGnl5P_f1c05GOZ]KAf2
+!s100 I``V[aP;i72CNVZ@9RRKS0
+R8
+32
+R24
+!i10b 1
+R25
+R43
+R44
+!i113 1
+R13
+R14
+vuart_tx_tb
+R16
+R24
+!i10b 1
+!s100 ?gV8XZV]HHY[mKSl;LPnK0
+IClUaSkOAOKQ_5Q8fj1k=m0
+S1
+R5
+w1650855376
+8C:/Users/george/Documents/Aerospace/uart/tb/uart_tx_tb.sv
+FC:/Users/george/Documents/Aerospace/uart/tb/uart_tx_tb.sv
+!i122 937
+L0 1 181
+R17
+R18
+r1
+!s85 0
+31
+R25
 !s107 C:/Users/george/Documents/Aerospace/uart/tb/uart_tx_tb.sv|
 !s90 -reportprogress|300|-work|work|-sv|-stats=none|C:/Users/george/Documents/Aerospace/uart/tb/uart_tx_tb.sv|
 !s101 -O0

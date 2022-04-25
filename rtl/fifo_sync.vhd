@@ -121,10 +121,10 @@ begin
 
 					-- write but no read 
 					when "10" =>
-						if(fillCount < FIFO_DEPTH-1) then
+						if(fillCount < FIFO_DEPTH) then
 							fillCount <= fillCount+1;
 						else
-							fillCount <= FIFO_DEPTH-1;
+							fillCount <= FIFO_DEPTH;
 						end if;
 
 					when others =>
@@ -143,7 +143,7 @@ begin
 			else    
 				if(i_rd = '1') then
 					overrun_next_wr <= overrun_next_wr and i_wr;
-				elsif(fillCount = FIFO_DEPTH-1) then
+				elsif(fillCount = FIFO_DEPTH) then
 					overrun_next_wr <= '1';
 				end if;
 			end if;
@@ -155,9 +155,9 @@ begin
 
 	-- combinatorial logic for status flags
 	o_fill         <= fillCount;
-	o_full         <= '1' when (fillCount = FIFO_DEPTH-1) else '0';
+	o_full         <= '1' when (fillCount = FIFO_DEPTH) else '0';
 	o_empty        <= '1' when (fillCount = 0) else '0';
-	o_almost_full  <= '1' when (fillCount >= FIFO_DEPTH-2) else '0';
+	o_almost_full  <= '1' when (fillCount >= FIFO_DEPTH-1) else '0';
 	o_almost_empty <= '1' when (fillCount <= 1) else '0';
 	o_overrun      <= '1' when (overrun_next_wr = '1' and i_wr = '1') else '0';
 

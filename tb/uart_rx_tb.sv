@@ -6,8 +6,10 @@ module uart_rx_tb();
 	parameter  T_CLK = 40;
 	localparam BAUDGEN_COUNTER_WIDTH = 20;
 	//
-	localparam DIVISOR = 16'd13;
-	localparam FRA_ADJ = 4'd2;
+	localparam  DIVISOR_X16  = 16'd13;
+    localparam  FRA_ADJ_X16  = 4'd6;
+    localparam  DIVISOR_X1   = 16'd217;
+    localparam  FRA_ADJ_X1   = 4'd0;
 
 	`ifdef TEST_PARITY
 	localparam PARITY_EN = 1;
@@ -21,6 +23,8 @@ module uart_rx_tb();
 // TEST VARS
 	logic                  i_clk;
 	logic                  i_rstn;
+    logic                  baud_en;
+    logic                  baud_x16_en;
 	logic                  baud_tick;
 	logic                  baud_tick_x16;
 	//
@@ -45,46 +49,56 @@ module uart_rx_tb();
     #(.DATA_WIDTH (DATA_WIDTH),
       .PARITY_EN  (PARITY_EN))
     uart_tx_i (
-    .i_clk   (i_clk),
-    .i_rstn  (i_rstn),
-    .i_baud  (baud_tick),
+    .i_clk     (i_clk),
+    .i_rstn    (i_rstn),
     //
-    .i_din   (i_din),
-    .i_valid (i_valid),
+    .i_baud    (baud_tick),
+    .o_baud_en (baud_en),
     //
-    .o_busy  (o_busy),
+    .i_din     (i_din),
+    .i_valid   (i_valid),
     //
-    .o_TX    (TX)
+    .o_busy    (o_busy),
+    //
+    .o_TX      (TX)
     ); 
 
 // DUT INSTANTIATION
 	uart_baudgen 
     #(.COUNTER_WIDTH(20))
     baudgen_i(
-    .i_clk      (i_clk),
-    .i_rstn     (i_rstn),
-    // 
-    .i_divisor  (DIVISOR),
-    .i_fra_adj  (FRA_ADJ),
+    .i_clk         (i_clk),
+    .i_rstn        (i_rstn),
+    //    
+    .i_divisor     (DIVISOR_X1),
+    .i_fra_adj     (FRA_ADJ_X1),
     //
-    .o_baud     (baud_tick),
-    .o_baud_x16 (baud_tick_x16) // unused
+    .i_divisor_x16 (DIVISOR_X16),
+    .i_fra_adj_x16 (FRA_ADJ_X16),
+    //
+    .i_baud_en     (baud_en),
+    .i_baud_x16_en (baud_x16_en), 
+    //
+    .o_baud        (baud_tick),
+    .o_baud_x16    (baud_tick_x16) 
     );
 
     uart_rx 
     #(.DATA_WIDTH(DATA_WIDTH),
       .PARITY_EN (PARITY_EN))
     DUT(
-    .i_clk      (i_clk),
-    .i_rstn     (i_rstn),
-    .i_baud_x16 (baud_tick_x16),
+    .i_clk         (i_clk),
+    .i_rstn        (i_rstn),
     //
-    .o_dout     (rx_data),
-    .o_valid    (rx_valid),
-    //
-    .o_error    (rx_error),
-    //
-    .i_RX       (TX)
+    .o_baud_x16_en (baud_x16_en),
+    .i_baud_x16    (baud_tick_x16),
+    //   
+    .o_dout        (rx_data),
+    .o_valid       (rx_valid),
+    //   
+    .o_error       (rx_error),
+    //   
+    .i_RX          (TX)
     );
 
 /* CLOCK GEN */

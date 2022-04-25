@@ -7,8 +7,10 @@ module uart_tx_tb();
     parameter   T_CLK      = 40;
     parameter   DATA_WIDTH = 8;
     //
-    localparam  DIVISOR    = 16'd13;
-    localparam  FRA_ADJ    = 4'd2;
+    localparam  DIVISOR_X16  = 16'd13;
+    localparam  FRA_ADJ_X16  = 4'd5;
+    localparam  DIVISOR_X1   = 16'd217;
+    localparam  FRA_ADJ_X1   = 4'd0;
     //
     localparam  CLKS_PER_BAUD = F_CLK / 115200;
     //
@@ -28,6 +30,7 @@ module uart_tx_tb();
     // uart_tx
     logic                  i_clk;
     logic                  i_rstn;
+    logic                  o_baud_en;
     logic [DATA_WIDTH-1:0] i_din;
     logic                  i_valid;
     logic                  o_busy;
@@ -58,14 +61,20 @@ module uart_tx_tb();
     uart_baudgen 
     #(.COUNTER_WIDTH(20))
     baudgen_i(
-    .i_clk      (i_clk),
-    .i_rstn     (i_rstn),
-    // 
-    .i_divisor  (DIVISOR),
-    .i_fra_adj  (FRA_ADJ),
+    .i_clk         (i_clk),
+    .i_rstn        (i_rstn),
+    //    
+    .i_divisor     (DIVISOR_X1),
+    .i_fra_adj     (FRA_ADJ_X1),
     //
-    .o_baud     (baud_tick),
-    .o_baud_x16 () // unused
+    .i_divisor_x16 (DIVISOR_X16),
+    .i_fra_adj_x16 (FRA_ADJ_X16),
+    //
+    .i_baud_en     (o_baud_en),
+    .i_baud_x16_en (), // unused
+    //
+    .o_baud        (baud_tick),
+    .o_baud_x16    () // unused
     );
 
 
@@ -73,16 +82,18 @@ module uart_tx_tb();
     #(.DATA_WIDTH (DATA_WIDTH),
       .PARITY_EN  (PARITY_EN))
     DUT (
-    .i_clk   (i_clk),
-    .i_rstn  (i_rstn),
-    .i_baud  (baud_tick),
+    .i_clk     (i_clk),
+    .i_rstn    (i_rstn),
     //
-    .i_din   (i_din),
-    .i_valid (i_valid),
+    .i_baud    (baud_tick),
+    .o_baud_en (o_baud_en),
     //
-    .o_busy  (o_busy),
-    //
-    .o_TX    (o_TX)
+    .i_din     (i_din),
+    .i_valid   (i_valid),
+    //  
+    .o_busy    (o_busy),
+    //  
+    .o_TX      (o_TX)
     ); 
 
 /* CLOCK GEN */

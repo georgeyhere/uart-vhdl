@@ -16,19 +16,22 @@ generic (
 	PARITY_EN  : integer := 0   -- '1' to enable parity bit, else '0'
 );
 port (
-	i_clk      : in  std_logic; -- input clock
-	i_rstn     : in  std_logic; -- active-low reset
-	i_baud_x16 : in  std_logic; -- 16x baud tick for RX sampling
+	i_clk         : in  std_logic; -- input clock
+	i_rstn        : in  std_logic; -- active-low reset
+
+    -- baud gen interface
+	i_baud_x16    : in  std_logic; -- 16x baud tick for RX sampling
+    o_baud_x16_en : out std_logic; -- baud tick enable
 	
 	-- RX data and valid
-	o_dout     : out std_logic_vector (DATA_WIDTH-1 downto 0); -- data out
-	o_valid    : out std_logic; -- data out valid, asserted for one cycle after transaction
+	o_dout        : out std_logic_vector (DATA_WIDTH-1 downto 0); -- data out
+	o_valid       : out std_logic; -- data out valid, asserted for one cycle after transaction
 
 	-- Status
-	o_error    : out std_logic_vector (1 downto 0); 
+	o_error       : out std_logic_vector (1 downto 0); 
 
 	-- UART RX pin
-	i_RX       : in  std_logic
+	i_RX          : in  std_logic
 );
 end uart_rx;
 
@@ -83,25 +86,28 @@ begin
 	begin
 		if rising_edge(i_clk) then
 			if(i_rstn = '0') then
-				STATE      <= STATE_IDLE;
-				o_valid    <= '0';
-				o_error    <= (others => '0');
-				o_dout     <= (others => '0');
-				rx_data    <= (others => '0');
-				rx_count   <= 0;
-				baud_count <= 0;
+				STATE         <= STATE_IDLE;
+                o_baud_x16_en <= '0';
+				o_valid       <= '0';
+				o_error       <= (others => '0');
+				o_dout        <= (others => '0');
+				rx_data       <= (others => '0');
+				rx_count      <= 0;
+				baud_count    <= 0;
 			else 
 				case STATE is 
 
 				-- STATE_IDLE:
 				--> When q2_RX goes low, go to STATE_START.
 					when STATE_IDLE =>
-						baud_count <= 0;
-						rx_count   <= 0;
-						o_valid    <= '0';
-						rx_data    <= (others => '0');
+                        o_baud_x16_en <= '0';
+						baud_count    <=  0;
+						rx_count      <=  0;
+						o_valid       <= '0';
+						rx_data       <= (others => '0');
 						if (q2_RX = '0') then
-							STATE   <= STATE_START;
+                            o_baud_x16_en <= '1';
+							STATE         <= STATE_START;
 						end if;
 
 				-- STATE_START:
@@ -128,7 +134,7 @@ begin
 						if(i_baud_x16 = '1') then
 							if(baud_count = 15) then
 								baud_count <= 0;
-								rx_data    <= rx_data(FRAME_WIDTH-2 downto 0) & q2_RX;
+								rx_data    <= q2_RX & rx_data(FRAME_WIDTH-1 downto 1);
 								--
 								if(rx_count = FRAME_WIDTH-2-PARITY_EN-1) then
 									STATE <= STATE_STOP;
@@ -155,9 +161,9 @@ begin
 								if(q2_RX = '1') then
 									o_valid <= '1';
 									if(PARITY_EN=1) then
-										o_dout <= rx_data(DATA_WIDTH downto 1);
+										o_dout <= rx_data(FRAME_WIDTH-2 downto 1);
 									else
-										o_dout <= rx_data(DATA_WIDTH-1 downto 0);
+										o_dout <= rx_data(FRAME_WIDTH-1 downto 2);
 									end if;
 								else 
 									o_valid    <= '0';
