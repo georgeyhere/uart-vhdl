@@ -63,9 +63,9 @@ begin
                     o_dout <= charToSlv('d');
                 when 16 =>
                     o_dout <= charToSlv('!');
-                when 17 =>
+                when 30 =>
                     o_dout <= "00001010";
-                when 18 =>
+                when 31 =>
                     o_dout <= "00001101";
                 when others =>
                     o_dout <= charToSlv(' ');

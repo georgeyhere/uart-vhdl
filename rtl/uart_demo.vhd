@@ -3,6 +3,18 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity uart_demo is
+generic(
+    DATA_WIDTH      : integer := 8;
+    TX_PARITY_EN    : integer := 0;
+    RX_PARITY_EN    : integer := 0;
+    FIFO_DATA_WIDTH : integer := 4;
+    --
+    DIVISOR_X16     : integer range 0 to 2**16-1 := 54;
+    FRA_ADJ_X16     : integer range 0 to 15      := 5;
+    --
+    TX_PARITY_CFG   : std_logic := '1';
+    RX_PARITY_CFG   : std_logic := '1'
+);
 port(
     i_clk  : in  std_logic;
     i_rstn : in  std_logic;
@@ -12,6 +24,7 @@ port(
     o_TX   : out std_logic;
 
     -- LEDs
+    o_intr : out std_logic;
     o_LED  : out std_logic_vector (7 downto 0)
 );
 end uart_demo;
@@ -101,21 +114,21 @@ begin
             else
                 case rxData is
                     when "00110000" =>
-                        LED(0) <= not(LED(0));
+                        LED(0) <= '1';
                     when "00110001" =>
-                        LED(1) <= not(LED(1));
+                        LED(1) <= '1';
                     when "00110010" =>
-                        LED(2) <= not(LED(2));
+                        LED(2) <= '1';
                     when "00110011" =>
-                        LED(3) <= not(LED(3));
+                        LED(3) <= '1';
                     when "00110100" =>
-                        LED(4) <= not(LED(4));
+                        LED(4) <= '1';
                     when "00110101" =>
-                        LED(5) <= not(LED(5));
+                        LED(5) <= '1';
                     when "00110110" =>
-                        LED(6) <= not(LED(6));
+                        LED(6) <= '1';
                     when "00110111" =>
-                        LED(7) <= not(LED(7));
+                        LED(7) <= '1';
                     when others =>
                         LED <= (others => '0');
                 end case;
@@ -137,18 +150,21 @@ begin
 
     uart_i : entity work.uart (Behavioral)
     GENERIC MAP (
-    DATA_WIDTH            => 8,
-    TX_PARITY_EN          => 0,
-    RX_PARITY_EN          => 0,
+    DATA_WIDTH            => DATA_WIDTH,
+    TX_PARITY_EN          => TX_PARITY_EN,
+    RX_PARITY_EN          => RX_PARITY_EN,
     BAUDGEN_COUNTER_WIDTH => 20,
-    FIFO_ADDR_WIDTH       => 4
+    FIFO_ADDR_WIDTH       => FIFO_DATA_WIDTH
     )
     PORT MAP (
     i_clk  => i_clk,
     i_rstn => i_rstn,
     --
-    i_divisor_x16     => 54,
-    i_fra_adj_x16     => 5,
+    i_divisor_x16     => DIVISOR_X16,
+    i_fra_adj_x16     => FRA_ADJ_X16,
+    --
+    i_tx_parity_cfg   => TX_PARITY_CFG,
+    i_rx_parity_cfg   => RX_PARITY_CFG,
     --    
     i_tx_wr           => uart_tx_wr,
     i_tx_data         => romData,
@@ -167,6 +183,9 @@ begin
     o_uart_rx_error   => open,
     o_fifo_tx_overrun => open,
     o_fifo_rx_overrun => open,
+    --
+    i_interrupt_en    => '1',
+    o_interrupt       => o_intr,
     --
     i_RX => i_RX,
     o_TX => o_TX

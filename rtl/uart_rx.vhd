@@ -20,6 +20,9 @@ port (
 	i_clk         : in  std_logic; -- input clock
 	i_rstn        : in  std_logic; -- active-low reset
 
+    -- parity bit config
+    i_parity_cfg  : in  std_logic; -- '1' for odd parity, '0' for even
+
     -- baud gen interface
 	i_baud_x16    : in  std_logic; -- 16x baud tick for RX sampling
     o_baud_x16_en : out std_logic; -- baud tick enable
@@ -39,10 +42,11 @@ end uart_rx;
 --
 architecture Behavioral of uart_rx is
 	-- 
-	constant FRAME_WIDTH : integer := DATA_WIDTH + 2 + PARITY_EN; 
+	--constant FRAME_WIDTH : integer := DATA_WIDTH + 2 + PARITY_EN; 
+    constant FRAME_WIDTH : integer := DATA_WIDTH + PARITY_EN;
 
 	-- FSM state enumeration w/ one-hot encoding
-	type t_fsm_state is (STATE_IDLE, STATE_START, STATE_ACTIVE, STATE_STOP);
+	type t_fsm_state is (STATE_IDLE, STATE_START, STATE_ACTIVE, STATE_PARITY, STATE_STOP);
 	attribute syn_encoding : string;
 	attribute syn_encoding of t_fsm_state : type is "onehot, safe";
 	signal STATE : t_fsm_state;
@@ -60,6 +64,7 @@ architecture Behavioral of uart_rx is
 	signal rx_data : std_logic_vector (FRAME_WIDTH-1 downto 0);
 
 	-- parity bit check: '1' for odd # of 1s, else '0'
+    signal parity_calc : std_logic_vector (FRAME_WIDTH downto 0);
 	signal parity : std_logic;
 begin
 
@@ -73,14 +78,11 @@ begin
 	end process;
 
 -- Combinatorial parity bit checker
-	PARITY_CHK: process(rx_data)
-	variable v_parity : std_logic;
-	begin
-		for i in rx_data'range loop
-			v_parity := v_parity xor rx_data(i);
-		end loop;
-		parity <= v_parity;
-	end process;
+	parity_calc(0) <= i_parity_cfg;
+    PARITY_GEN: for i in 0 to (FRAME_WIDTH-1) generate
+        parity_calc(i+1) <= parity_calc(i) xor rx_data(i);
+    end generate;
+    parity <= parity_calc(FRAME_WIDTH);
 
 -- Sync FSM process
 	FSM_SYNC: process(i_clk) 
@@ -130,18 +132,20 @@ begin
 
 				-- STATE_ACTIVE:
 				--> Sample and shift in q2_RX once every 16 sampling baud ticks.
-				--> If applicable, check for odd parity bit and set o_error(1) accordingly.
+				--> If parity bit is enabled, goto STATE_PARITY after all data bits are sampled.
+                --> Else, goto STATE_STOP.
 					when STATE_ACTIVE =>
 						if(i_baud_x16 = '1') then
 							if(baud_count = 15) then
 								baud_count <= 0;
 								rx_data    <= q2_RX & rx_data(FRAME_WIDTH-1 downto 1);
 								--
-								if(rx_count = FRAME_WIDTH-2-PARITY_EN-1) then
-									STATE <= STATE_STOP;
-									if((PARITY_EN=1) and (parity /= q2_RX)) then
-										o_error(1) <= '1';
-									end if;
+								if(rx_count = FRAME_WIDTH-1-PARITY_EN) then
+                                    if(PARITY_EN = 1) then
+                                        STATE <= STATE_PARITY;
+                                    else
+									    STATE <= STATE_STOP;
+                                    end if;
 								else 
 									rx_count <= rx_count + 1;
 								end if;
@@ -149,22 +153,42 @@ begin
 								baud_count <= baud_count + 1;
 							end if;
 						end if;
+                    
+                    -- STATE_PARITY:
+                    --> Sample parity bit and compare against locally generated parity bit.
+                    --> If parity bits do not match, set o_error(1).
+                    --> After doing parity check, goto STATE_STOP.
+                    when STATE_PARITY =>
+                    if(i_baud_x16 = '1') then
+                        if(baud_count = 15) then
+                            baud_count <= 0;
+                            rx_data    <= q2_RX & rx_data(FRAME_WIDTH-1 downto 1);
+                            STATE      <= STATE_STOP;
+                            if(parity /= q2_RX) then
+                                o_error(1) <= '1';
+                            end if;
+                        else
+                            baud_count <= baud_count + 1;
+                        end if;
+                    end if;
 
 				-- STATE_STOP:
 				--> Look for stop bit, return to STATE_IDLE regardless of result.
-				--> If no stop bit, set o_error(0).
-				--> Set output data and valid.
+                --> A stop bit is only valid if it is held for 8 sampling baud ticks.
+				--> If stop bit is invalid, set o_error(0) and return to STATE_IDLE.
+				--> If stop bit is valid, set output data and valid and return to STATE_IDLE.
 					when STATE_STOP =>
 						if(i_baud_x16 = '1') then
+
 							if(baud_count = 15) then
 								baud_count <= 0;
 								STATE <= STATE_IDLE;
 								if(q2_RX = '1') then
 									o_valid <= '1';
-									if(PARITY_EN=1) then
-										o_dout <= rx_data(FRAME_WIDTH-2 downto 1);
+                                    if(PARITY_EN=1) then
+										o_dout <= rx_data(FRAME_WIDTH-2 downto 0);
 									else
-										o_dout <= rx_data(FRAME_WIDTH-1 downto 2);
+										o_dout <= rx_data(FRAME_WIDTH-1 downto 0);
 									end if;
 								else 
 									o_valid    <= '0';

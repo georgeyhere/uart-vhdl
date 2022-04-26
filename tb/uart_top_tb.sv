@@ -1,16 +1,19 @@
 module uart_top_tb();
 
 // TEST PARAMETERS
-    parameter T_CLK = 40;
+    parameter T_CLK                  = 40;
+    parameter PARITY_EN              = 0;
+    parameter TX_PARITY_ODD          = 1'b1;
+    parameter RX_PARITY_ODD          = 1'b1;
     //
-    localparam  DIVISOR_X16  = 16'd13;
-    localparam  FRA_ADJ_X16  = 4'd6;
+    localparam  DIVISOR_X16          = 16'd13;
+    localparam  FRA_ADJ_X16          = 4'd6;
 
-    localparam DATA_WIDTH = 8;
+    localparam DATA_WIDTH            = 8;
     localparam BAUDGEN_COUNTER_WIDTH = 20;
-    localparam FIFO_ADDR_WIDTH = 4;
+    localparam FIFO_ADDR_WIDTH       = 4;
     //
-    localparam CLKS_PER_BYTE = 2500;
+    localparam CLKS_PER_BYTE         = 2500;
 
 // TEST VARS
     logic i_clk, i_rstn;
@@ -48,8 +51,8 @@ module uart_top_tb();
 // DUT INSTANTIATION
     uart 
     #(.DATA_WIDTH            (DATA_WIDTH),
-      .TX_PARITY_EN          (0),
-      .RX_PARITY_EN          (0),
+      .TX_PARITY_EN          (PARITY_EN),
+      .RX_PARITY_EN          (PARITY_EN),
       .BAUDGEN_COUNTER_WIDTH (BAUDGEN_COUNTER_WIDTH),
       .FIFO_ADDR_WIDTH       (FIFO_ADDR_WIDTH))
     DUT (
@@ -59,6 +62,10 @@ module uart_top_tb();
     // baudgen cfg
     .i_divisor_x16     (DIVISOR_X16),
     .i_fra_adj_x16     (FRA_ADJ_X16),
+
+    // parity cfg
+    .i_tx_parity_cfg   (TX_PARITY_ODD),
+    .i_rx_parity_cfg   (RX_PARITY_ODD),
     
     // tx fifo
     .i_tx_wr           (i_tx_wr),
@@ -91,6 +98,7 @@ module uart_top_tb();
     task txWrite;
         input int numBytes;
         begin
+            $display("Writing %0d random bytes to TX FIFO...", numBytes);
             for(int i=0; i<numBytes; i++) begin
                 @(posedge i_clk) begin
                     i_tx_data <= $urandom;
@@ -112,19 +120,22 @@ module uart_top_tb();
     task rxRead;
         input int numBytes;
         begin
-            $display("-------------------------------");
+            $display("-----------------------------------");
+            $display("Reading %0d bytes from RX FIFO...", numBytes);
             for(int i=0; i<numBytes; i++) begin
                 @(posedge i_clk) i_rx_rd <= 1;
                 @(posedge i_clk) i_rx_rd <= 0;
             end
             @(posedge i_clk) i_rx_rd <= 0;
-            $display("-------------------------------");
+            $display("-----------------------------------");
         end
     endtask;
 
     /* Reset TX FIFO */
     task txFifoRst;
         begin
+            test_queue.delete();
+            $display("Resetting TX FIFO...");
             @(posedge i_clk) i_tx_fifo_rst <= 1;
             @(posedge i_clk) i_tx_fifo_rst <= 0;
         end
@@ -133,6 +144,7 @@ module uart_top_tb();
     /* Reset RX FIFO */
     task rxFifoRst;
         begin
+            $display("Resetting RX FIFO...");
             @(posedge i_clk) i_rx_fifo_rst <= 1;
             @(posedge i_clk) i_rx_fifo_rst <= 0;
         end
@@ -141,6 +153,7 @@ module uart_top_tb();
     /* Reset error flags */
     task errorRst;
         begin 
+            $display("Resetting error flags...");
             @(posedge i_clk) i_error_rst <= 1;
             @(posedge i_clk) i_error_rst <= 0;
         end
@@ -149,15 +162,17 @@ module uart_top_tb();
 
 
 //
+/*
     always@(posedge i_clk) begin
         if(o_uart_rx_error) $display("RX ERROR!");
         if(o_fifo_rx_overrun > 0 & i_rx_rd) $display("RX OVERRUN!");
         if(o_fifo_tx_overrun > 0 & i_tx_wr) $display("TX OVERRUN!");
     end
-
+*/
     always@(posedge i_clk) begin
         if(!o_rx_empty & i_rx_rd) begin
             test_expected = test_queue.pop_back();
+            if(test_expected != o_rx_data) $display("RX Mismatch!");
             $display("RX FIFO expected:  %b", test_expected);
             $display("RX FIFO reads:     %b", o_rx_data);
             $display("");
@@ -177,21 +192,25 @@ module uart_top_tb();
         i_rstn = 1;
         #100;
 
-        /*
-        Write 16 bytes and don't read.
-        -> expect 16 bytes to be sent.
-        -> expect 0 overrun errors.
-        */
-        txWrite(16);
-        repeat(16*CLKS_PER_BYTE) begin
-            @(posedge i_clk);
-        end
+        for(int i=0; i<10; i++) begin
+            /*
+            Write 16 bytes and don't read.
+            -> expect 16 bytes to be sent.
+            -> expect 0 overrun errors.
+            */
+            txWrite(16);
+            repeat(16*CLKS_PER_BYTE) begin
+                @(posedge i_clk);
+            end
+            #22;
 
-        /*
-        Read 16 bytes.
-        ->
-        */
-        rxRead(16);
+            /*
+            Read 16 bytes.
+            ->
+            */
+            rxRead(16);
+        end
+        
 
         /*
         Write 8 bytes and read them back.
@@ -220,42 +239,46 @@ module uart_top_tb();
             @(posedge i_clk); 
         end
 //
-        ///*
-        //Empty the RX FIFO.
-        //-> expect 0 errors.
-        //*/
+        /*
+        Empty the RX FIFO.
+        -> expect 0 errors but data mismatch.
+        */
         //rxRead(16);
+
+        /* Reset the TX and RX FIFOs. */
+        txFifoRst();
+        rxFifoRst();
+
+        /*
+        Write 16 bytes and don't read.
+        -> expect 16 bytes to be sent.
+        -> expect 0 overrun errors.
+        */
+        txWrite(16);
+        repeat(16*CLKS_PER_BYTE) begin
+            @(posedge i_clk);
+        end
 //
-        ///*
-        //Write 16 bytes and don't read.
-        //-> expect 16 bytes to be sent.
-        //-> expect 0 overrun errors.
-        //*/
-        //txWrite(16);
-        //repeat(16*CLKS_PER_BYTE) begin
-        //    @(posedge i_clk);
-        //end
+        /*
+        Read 16 bytes.
+        ->
+        */
+        rxRead(16);
+        #10000;
+        
+        /*
+        Read 5 bytes from an empty RX FIFO.
+        -> This should never happen during normal operation, driver
+           will block reads from empty.
+        */
+        rxRead(5);
 //
-        ///*
-        //Read 16 bytes and don't read.
-        //->
-        //*/
-        //rxRead(16);
-        //#10000;
-        //
-        ///*
-        //Read 5 bytes from an empty RX FIFO.
-        //-> This should never happen during normal operation, driver
-        //   will block reads from empty.
-        //*/
-        //rxRead(5);
+        /*
+        Reset the error register.
+        */
+        errorRst();
 //
-        ///*
-        //Reset the error register.
-        //*/
-        //errorRst();
-//
-        //#2000;
+        #2000;
         $stop;
     end
 

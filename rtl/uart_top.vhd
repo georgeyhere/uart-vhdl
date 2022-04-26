@@ -1,3 +1,25 @@
+-- uart_top.vhd:
+-- A generic UART with configurable baud rate input/output buffers. Data width, 
+-- parity bit enables, and buffer depth can be set pre-synthesis. 
+-- 
+-- Dependencies: 
+--    uart_baudgen.vhd
+--    uart_rx.vhd
+--    uart_tx.vhd
+--    fifo_sync.vhd
+--
+-- Parameters:
+--    1) data width
+--    2) TX parity bit enable
+--    3) RX parity bit enable
+--    4) Baud generator clock divider counter width
+--    5) TX/RX buffer depth
+--
+-- Interrupt:
+-- The interrupt is enabled by setting i_interrupt_en. The interrupt is rising-edge
+-- sensitive and is triggered when the RX FIFO becomes non-empty or when the TX FIFO
+-- becomes empty.
+--
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
@@ -19,6 +41,10 @@ port (
 	i_divisor_x16     : in integer range 0 to 2**16-1;  -- 16-bit 16x buad tick clock divider divisor
     i_fra_adj_x16     : in integer range 0 to 15;       -- 4-bit 16x baud tick fractional adjustment bits
 
+    -- PARITY BIT CONFIG
+    i_tx_parity_cfg   : in  std_logic; -- TX parity bit config; '1' for odd, '0' for even
+    i_rx_parity_cfg   : in  std_logic; -- RX parity bit config; '1' for odd, '0' for even
+
 	-- TX FIFO INTERFACE
 	i_tx_wr           : in  std_logic;                                -- tx fifo write enable
 	i_tx_data         : in  std_logic_vector (DATA_WIDTH-1 downto 0); -- tx fifo data in 
@@ -39,6 +65,10 @@ port (
 	o_uart_rx_error   : out std_logic_vector (1 downto 0);            -- (0): missed stop bit; (1) parity failed
 	o_fifo_tx_overrun : out integer range 0 to 15;                    -- counts # of TX FIFO overruns
 	o_fifo_rx_overrun : out integer range 0 to 15;                    -- counts # of RX FIFO overruns
+
+    -- INTERRUPT
+    i_interrupt_en    : in  std_logic; -- interrupt enable
+    o_interrupt       : out std_logic; -- rising-edge sensitive interrupt
 
 	-- UART INTERFACE
 	i_RX              : in  std_logic; 
@@ -76,12 +106,42 @@ architecture Behavioral of uart is
 	-- RX UART to RX FIFO
 	signal fifo_rx_rstn         : std_logic;
 	signal fifo_rx_din          : std_logic_vector (DATA_WIDTH-1 downto 0);  
-	signal fifo_rx_wr           : std_logic := '0';                            
+	signal fifo_rx_wr           : std_logic := '0';  
+    signal fifo_rx_empty        : std_logic;                          
 	signal fifo_rx_overrun      : integer range 0 to 15;                     
 	signal fifo_rx_error        : std_logic;     
-    signal fifo_rx_full         : std_logic;                            
+    signal fifo_rx_full         : std_logic;       
+    
+    -- INTERRUPT
+    signal fifo_tx_empty_q1     : std_logic;
+    signal fifo_rx_empty_q1     : std_logic;
 begin
 
+    -- INTERRUPT GEN
+    INTERRUPT_GEN: process(i_clk)
+    begin
+        if rising_edge(i_clk) then
+            if(i_rstn = '0') then
+                fifo_tx_empty_q1 <= '0';
+                fifo_rx_empty_q1 <= '0';
+                o_interrupt      <= '0';
+            else
+                if(i_interrupt_en = '1') then
+                    fifo_tx_empty_q1 <= fifo_tx_empty;
+                    fifo_rx_empty_q1 <= fifo_rx_empty;
+                    if( (fifo_rx_empty_q1 = '1' and fifo_rx_empty = '0') or     -- negedge rx empty
+                        (fifo_tx_empty_q1 = '0' and fifo_tx_empty = '1') ) then -- posedge tx empty
+                        o_interrupt <= '1';
+                    else
+                        o_interrupt <= '0';
+                    end if;
+                else
+                    o_interrupt <= '0';
+                end if;
+            end if;
+        end if;
+    end process;
+                                    
 	-- FIFO ACTIVE LOW RESETS
 	fifo_tx_rstn <= i_rstn and not(i_tx_fifo_rst);
 	fifo_rx_rstn <= i_rstn and not(i_rx_fifo_rst);
@@ -185,18 +245,20 @@ begin
 	PARITY_EN  => TX_PARITY_EN
 	)
 	PORT MAP (
-	i_clk     => i_clk,
-	i_rstn    => i_rstn,
+	i_clk        => i_clk,
+	i_rstn       => i_rstn,
     --
-	i_baud    => baud_tick,    -- Baud tick
-    o_baud_en => baud_tick_en,
-	--
-	i_din     => fifo_tx_dout, -- TX data in from TX FIFO
-	i_valid   => fifo_tx_rd,   -- Valid on TX FIFO read
-	-- 
-	o_busy    => uart_tx_busy, -- asserted when a transaction is in progress
-    -- 
-    o_TX      => o_TX
+    i_parity_cfg => i_tx_parity_cfg,
+    --
+	i_baud       => baud_tick,    -- Baud tick
+    o_baud_en    => baud_tick_en,
+	--   
+	i_din        => fifo_tx_dout, -- TX data in from TX FIFO
+	i_valid      => fifo_tx_rd,   -- Valid on TX FIFO read
+	--    
+	o_busy       => uart_tx_busy, -- asserted when a transaction is in progress
+    --    
+    o_TX         => o_TX
 	);
 
 	-- RX FIFO
@@ -211,19 +273,20 @@ begin
 	i_clk          => i_clk,
 	i_rstn         => fifo_rx_rstn,
 	--       
-	i_wr           => fifo_rx_wr,   -- UART RX data out valid
-	i_din          => fifo_rx_din,  -- UART RX data out
-	--       
-	i_rd           => i_rx_rd,      -- driven by top level inputs
-	o_dout         => o_rx_data,    -- top level RX data out
-	--
-	o_empty        => o_rx_empty,   -- empty flag
-	o_full         => fifo_rx_full, -- unused 
-	o_almost_empty => open,         -- unused
-	o_almost_full  => open,         -- unused
-	o_fill         => o_rx_fill,    -- unused
-	o_overrun      => fifo_rx_error -- '1' indiciates overrun error
+	i_wr           => fifo_rx_wr,    -- UART RX data out valid
+	i_din          => fifo_rx_din,   -- UART RX data out
+	--        
+	i_rd           => i_rx_rd,       -- driven by top level inputs
+	o_dout         => o_rx_data,     -- top level RX data out
+	-- 
+	o_empty        => fifo_rx_empty, -- empty flag
+	o_full         => fifo_rx_full,  -- unused 
+	o_almost_empty => open,          -- unused
+	o_almost_full  => open,          -- unused
+	o_fill         => o_rx_fill,     -- unused
+	o_overrun      => fifo_rx_error  -- '1' indiciates overrun error
 	);
+    o_rx_empty <= fifo_rx_empty;
 
 	-- UART RX Module
 	--> Writes data out directly to RX FIFO regardless of its fill level.
@@ -236,6 +299,8 @@ begin
 	PORT MAP (
 	i_clk         => i_clk,         
 	i_rstn        => i_rstn,   
+    --
+    i_parity_cfg  => i_rx_parity_cfg,
     --     
 	i_baud_x16    => baud_tick_x16, -- 16x frequency baud tick for sampling
     o_baud_x16_en => baud_tick_x16_en,

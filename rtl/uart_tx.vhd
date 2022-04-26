@@ -14,22 +14,25 @@ generic (
 	PARITY_EN  : integer := 0  -- '1' to enable parity bit, else '0'
 );
 port ( 
-	i_clk     : in  std_logic; -- input clock
-	i_rstn    : in  std_logic; -- active-low reset
+	i_clk         : in  std_logic; -- input clock
+	i_rstn        : in  std_logic; -- active-low reset
+
+    -- parity bit config
+    i_parity_cfg  : in  std_logic; -- '1' for odd parity, '0' for even
 
     -- baud gen interface
-	i_baud    : in  std_logic; -- baud tick
-	o_baud_en : out std_logic;
+	i_baud        : in  std_logic; -- baud tick
+	o_baud_en     : out std_logic;
 
 	-- TX data and valid
-	i_din     : in  std_logic_vector (DATA_WIDTH-1 downto 0);  
-	i_valid   : in  std_logic;
+	i_din         : in  std_logic_vector (DATA_WIDTH-1 downto 0);  
+	i_valid       : in  std_logic;
 
 	-- Status 
-	o_busy    : out std_logic; -- '1' when transaction in progress, '0' at idle
+	o_busy        : out std_logic; -- '1' when transaction in progress, '0' at idle
 
 	-- UART TX pin
-	o_TX      : out std_logic
+	o_TX          : out std_logic
 );
 
 end uart_tx;
@@ -56,18 +59,24 @@ architecture Behavioral of uart_tx is
 	signal tx_queue : std_logic_vector (FRAME_WIDTH-1 downto 0);
 	
 	-- parity bit 
+    signal parity_calc : std_logic_vector (DATA_WIDTH downto 0);
 	signal parity : std_logic;
 begin
 
 -- Combinatorial parity bit generator 
-	PARITY_GEN: process(i_din) 
-	variable v_parity : std_logic;
-	begin
-		for i in i_din'range loop
-			v_parity := v_parity xor i_din(i);
-		end loop;
-		parity <= v_parity;
-	end process;
+	--PARITY_GEN: process(i_din) 
+	--variable v_parity : std_logic;
+	--begin
+	--	for i in i_din'range loop
+	--		v_parity := v_parity xor i_din(i);
+	--	end loop;
+	--	parity <= v_parity;
+	--end process;
+    parity_calc(0) <= i_parity_cfg;
+    PARITY_GEN: for i in 0 to (DATA_WIDTH-1) generate
+        parity_calc(i+1) <= parity_calc(i) xor i_din(i);
+    end generate;
+    parity <= parity_calc(DATA_WIDTH);
 
 -- Sync FSM process
 	FSM_SYNC: process(i_clk) begin
