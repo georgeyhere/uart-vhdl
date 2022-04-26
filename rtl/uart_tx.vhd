@@ -83,7 +83,7 @@ begin
 				
 				-- STATE_IDLE:
 				-- When i_valid is asserted, start a transmission.
-				--  > load tx_queue with start, data, parity, and stop bits (MSB first)
+				--  > load tx_queue with start, data, parity, and stop bits (LSB first)
 				--  > set status flags
 				--  > set tx_count to number of bits to send
 				--  > goto STATE_ACTIVE

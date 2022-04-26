@@ -12,17 +12,20 @@ generic (
 );
 port (
 	-- SYSTEM
-	i_clk             : in  std_logic;                                -- system clock
-	i_rstn            : in  std_logic;                                -- synchronous active-low reset
+	i_clk             : in  std_logic;                  -- system clock
+	i_rstn            : in  std_logic;                  -- synchronous active-low reset
 	
 	-- BAUD GEN CONFIG
-	i_divisor         : in  std_logic_vector (15 downto 0);           -- 16x f clock divider divisor
-	i_fra_adj         : in  std_logic_vector (3  downto 0);           -- fractional adjustment bits
-	
+	i_divisor         : in integer range 0 to 2**16-1;  -- 16-bit 1x baud tick clock divider divisor 
+	i_fra_adj         : in integer range 0 to 15;       -- 4-bit 1x baud tick fractional adjustment bits
+	i_divisor_x16     : in integer range 0 to 2**16-1;  -- 16-bit 16x buad tick clock divider divisor
+    i_fra_adj_x16     : in integer range 0 to 15;       -- 4-bit 16x baud tick fractional adjustment bits
+
 	-- TX FIFO INTERFACE
 	i_tx_wr           : in  std_logic;                                -- tx fifo write enable
 	i_tx_data         : in  std_logic_vector (DATA_WIDTH-1 downto 0); -- tx fifo data in 
-	o_tx_full         : out std_logic;                                -- tx fifo full flag
+	o_tx_full         : out std_logic;      
+    o_tx_almost_full  : out std_logic;                         
 	o_tx_fill         : out integer range 0 to 2**FIFO_ADDR_WIDTH;    -- tx fifo fill level
 	i_tx_fifo_rst     : in  std_logic;                                -- tx fifo reset, active high
 
@@ -52,7 +55,9 @@ architecture Behavioral of uart is
 
 	-- Baud Ticks
 	signal baud_tick            : std_logic; 
-	signal baud_tick_x16        : std_logic; 
+    signal baud_tick_en         : std_logic;
+	signal baud_tick_x16        : std_logic;
+    signal baud_tick_x16_en     : std_logic; 
 
 	-- TX UART
 	signal uart_tx_busy         : std_logic;                               
@@ -134,14 +139,20 @@ begin
 	COUNTER_WIDTH => BAUDGEN_COUNTER_WIDTH
 	)
 	PORT MAP (
-	i_clk      => i_clk,
-	i_rstn     => i_rstn,
+	i_clk         => i_clk,
+	i_rstn        => i_rstn,
 	--
-	i_divisor  => i_divisor,
-	i_fra_adj  => i_fra_adj,
+	i_divisor     => i_divisor,
+	i_fra_adj     => i_fra_adj,
+    --
+    i_divisor_x16 => i_divisor_x16,
+    i_fra_adj_x16 => i_fra_adj_x16,
+    --
+    i_baud_en     => baud_tick_en,
+    i_baud_x16_en => baud_tick_x16_en,
 	--
-	o_baud     => baud_tick,
-	o_baud_x16 => baud_tick_x16
+	o_baud        => baud_tick,
+	o_baud_x16    => baud_tick_x16
 	);
 
 	-- TX FIFO
@@ -166,7 +177,7 @@ begin
 	o_empty        => fifo_tx_empty,        -- empty flag
 	o_full         => fifo_tx_full,         -- full flag
 	o_almost_empty => open,                 -- almost empty flag 
-	o_almost_full  => open,                 -- unused
+	o_almost_full  => o_tx_almost_full,     -- unused
 	o_fill         => o_tx_fill,            -- fill level
 	o_overrun      => fifo_tx_error         -- '1' indicates overrun error
 	);
@@ -179,16 +190,18 @@ begin
 	PARITY_EN  => TX_PARITY_EN
 	)
 	PORT MAP (
-	i_clk    => i_clk,
-	i_rstn   => i_rstn,
-	i_baud   => baud_tick,    -- Baud tick
-	--
-	i_din    => fifo_tx_dout, -- TX data in from TX FIFO
-	i_valid  => fifo_tx_rd,   -- Valid on TX FIFO read
-	--
-	o_busy   => uart_tx_busy, -- asserted when a transaction is in progress
+	i_clk     => i_clk,
+	i_rstn    => i_rstn,
     --
-    o_TX     => o_TX
+	i_baud    => baud_tick,    -- Baud tick
+    o_baud_en => baud_tick_en,
+	--
+	i_din     => fifo_tx_dout, -- TX data in from TX FIFO
+	i_valid   => fifo_tx_rd,   -- Valid on TX FIFO read
+	-- 
+	o_busy    => uart_tx_busy, -- asserted when a transaction is in progress
+    -- 
+    o_TX      => o_TX
 	);
 
 	-- RX FIFO
@@ -226,16 +239,18 @@ begin
 	PARITY_EN  => RX_PARITY_EN
 	)
 	PORT MAP (
-	i_clk      => i_clk,         
-	i_rstn     => i_rstn,        
-	i_baud_x16 => baud_tick_x16, -- 16x frequency baud tick for sampling
+	i_clk         => i_clk,         
+	i_rstn        => i_rstn,   
+    --     
+	i_baud_x16    => baud_tick_x16, -- 16x frequency baud tick for sampling
+    o_baud_x16_en => baud_tick_x16_en,
 	--
-	o_dout     => fifo_rx_din,   -- RX data out, written directly to RX FIFO
-	o_valid    => fifo_rx_wr,    -- RX FIFO write enable
-	--
-	o_error    => uart_rx_error, -- (0): missing stop bit | (1): odd parity fail
-    --
-	i_RX       => i_RX
+	o_dout        => fifo_rx_din,   -- RX data out, written directly to RX FIFO
+	o_valid       => fifo_rx_wr,    -- RX FIFO write enable
+	--   
+	o_error       => uart_rx_error, -- (0): missing stop bit | (1): odd parity fail
+    --   
+	i_RX          => i_RX
 	);
 	
 

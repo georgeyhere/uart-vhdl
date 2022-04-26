@@ -62,7 +62,7 @@ architecture Behavioral of uart_baudgen is
 
 	-- counter for 2x baud rate tick gen 
 	--signal count_baud      : std_logic_vector (COUNTER_WIDTH-1 downto 0);
-    signal count_baud      : integer range 0 to COUNTER_WIDTH**2-1;
+    signal count_baud      : integer range 0 to 2**COUNTER_WIDTH-1;
 	signal baud            : std_logic;
 
 	-- 4-bit counter for 1x baud rate tick fractional adjustment

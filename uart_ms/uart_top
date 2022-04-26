@@ -1,0 +1,67 @@
+onerror {resume}
+quietly WaveActivateNextPane {} 0
+add wave -noupdate /uart_top_tb/i_clk
+add wave -noupdate /uart_top_tb/i_rstn
+add wave -noupdate -divider {TX FIFO DIN}
+add wave -noupdate /uart_top_tb/DUT/fifo_tx/i_wr
+add wave -noupdate /uart_top_tb/DUT/fifo_tx/i_din
+add wave -noupdate /uart_top_tb/DUT/fifo_tx/o_almost_full
+add wave -noupdate /uart_top_tb/DUT/fifo_tx/o_full
+add wave -noupdate /uart_top_tb/DUT/fifo_tx/FIFO_MEM
+add wave -noupdate /uart_top_tb/DUT/fifo_tx/o_fill
+add wave -noupdate -divider {TX FIFO TO TX UART}
+add wave -noupdate /uart_top_tb/DUT/fifo_tx/i_rd
+add wave -noupdate /uart_top_tb/DUT/fifo_tx/o_dout
+add wave -noupdate /uart_top_tb/DUT/fifo_tx/o_almost_empty
+add wave -noupdate /uart_top_tb/DUT/fifo_tx/o_empty
+add wave -noupdate /uart_top_tb/DUT/fifo_tx/o_overrun
+add wave -noupdate -divider {TX UART}
+add wave -noupdate /uart_top_tb/DUT/uart_tx/i_valid
+add wave -noupdate /uart_top_tb/DUT/uart_tx/i_din
+add wave -noupdate /uart_top_tb/DUT/uart_tx/tx_queue
+add wave -noupdate /uart_top_tb/DUT/uart_tx/STATE
+add wave -noupdate /uart_top_tb/DUT/uart_tx/o_TX
+add wave -noupdate /uart_top_tb/DUT/uart_tx/i_baud
+TreeUpdate [SetDefaultTree]
+quietly WaveActivateNextPane
+add wave -noupdate /uart_top_tb/i_clk
+add wave -noupdate -divider {RX UART TO RX FIFO}
+add wave -noupdate /uart_top_tb/DUT/uart_rx/i_RX
+add wave -noupdate /uart_top_tb/DUT/uart_rx/i_baud_x16
+add wave -noupdate /uart_top_tb/DUT/uart_rx/o_dout
+add wave -noupdate /uart_top_tb/DUT/uart_rx/o_valid
+add wave -noupdate /uart_top_tb/DUT/uart_rx/STATE
+add wave -noupdate -divider {RX FIFO DIN}
+add wave -noupdate /uart_top_tb/DUT/fifo_rx/i_wr
+add wave -noupdate /uart_top_tb/DUT/fifo_rx/i_din
+add wave -noupdate /uart_top_tb/DUT/fifo_rx/o_almost_full
+add wave -noupdate /uart_top_tb/DUT/fifo_rx/o_full
+add wave -noupdate /uart_top_tb/DUT/fifo_rx/FIFO_MEM
+add wave -noupdate /uart_top_tb/DUT/fifo_rx/o_fill
+add wave -noupdate -divider {RX FIFO DOUT}
+add wave -noupdate /uart_top_tb/DUT/i_rx_rd
+add wave -noupdate /uart_top_tb/DUT/o_rx_data
+add wave -noupdate /uart_top_tb/DUT/fifo_rx/o_empty
+add wave -noupdate /uart_top_tb/DUT/fifo_rx/o_almost_empty
+add wave -noupdate -divider STATUS
+add wave -noupdate /uart_top_tb/DUT/o_fifo_tx_overrun
+add wave -noupdate /uart_top_tb/DUT/o_fifo_rx_overrun
+add wave -noupdate /uart_top_tb/DUT/o_uart_rx_error
+TreeUpdate [SetDefaultTree]
+WaveRestoreCursors {{Cursor 1} {1659911 ps} 0}
+quietly wave cursor active 1
+configure wave -namecolwidth 150
+configure wave -valuecolwidth 100
+configure wave -justifyvalue left
+configure wave -signalnamewidth 0
+configure wave -snapdistance 10
+configure wave -datasetprefix 0
+configure wave -rowmargin 4
+configure wave -childrowmargin 2
+configure wave -gridoffset 0
+configure wave -gridperiod 1
+configure wave -griddelta 40
+configure wave -timeline 0
+configure wave -timelineunits ps
+update
+WaveRestoreZoom {1564944 ps} {1857333 ps}

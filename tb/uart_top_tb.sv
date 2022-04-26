@@ -3,8 +3,10 @@ module uart_top_tb();
 // TEST PARAMETERS
     parameter T_CLK = 40;
     //
-    localparam DIVISOR = 16'd13;
-    localparam FRA_ADJ = 4'd2;
+    localparam  DIVISOR_X16  = 16'd13;
+    localparam  FRA_ADJ_X16  = 4'd6;
+    localparam  DIVISOR_X1   = 16'd217;
+    localparam  FRA_ADJ_X1   = 4'd0;
 
     localparam DATA_WIDTH = 8;
     localparam BAUDGEN_COUNTER_WIDTH = 20;
@@ -36,6 +38,11 @@ module uart_top_tb();
     logic RX;
     assign RX = TX; // loopback test
 
+    // TEST ENVIRONMENT
+    localparam FIFO_DEPTH = 2**FIFO_ADDR_WIDTH-1;
+    logic [DATA_WIDTH-1:0] test_queue [$];
+    logic [DATA_WIDTH-1:0] test_expected;
+
 // CLOCK GEN
     initial i_clk = 0;
     always#(T_CLK/2) i_clk = !i_clk;
@@ -52,8 +59,10 @@ module uart_top_tb();
     .i_rstn            (i_rstn),
     
     // baudgen cfg
-    .i_divisor         (DIVISOR),
-    .i_fra_adj         (FRA_ADJ),
+    .i_divisor         (DIVISOR_X1),
+    .i_fra_adj         (FRA_ADJ_X1),
+    .i_divisor_x16     (DIVISOR_X16),
+    .i_fra_adj_x16     (FRA_ADJ_X16),
     
     // tx fifo
     .i_tx_wr           (i_tx_wr),
@@ -89,10 +98,13 @@ module uart_top_tb();
             for(int i=0; i<numBytes; i++) begin
                 @(posedge i_clk) begin
                     i_tx_data <= $urandom;
-                    i_tx_wr   <= 1;
+                    i_tx_wr   <= 1; 
                     //
                     #1;
-                    if(!o_tx_full) $display("TX FIFO writes [%2d]: %b", i, i_tx_data);
+                    if(!o_tx_full) begin
+                        $display("TX FIFO writes [%2d]: %b", i, i_tx_data);
+                        test_queue.push_front(i_tx_data);
+                    end
                     else $display("User TX FIFO overrun! Write data: %b", i_tx_data);
                 end
             end
@@ -106,12 +118,8 @@ module uart_top_tb();
         begin
             $display("-------------------------------");
             for(int i=0; i<numBytes; i++) begin
-                @(posedge i_clk) begin
-                    i_rx_rd <= 1;
-                    //
-                    if(!o_rx_empty) $display("RX FIFO reads [%2d]: %b", i, o_rx_data);
-                    else $display("User read from empty RX FIFO! Read data: %b", o_rx_data);
-                end
+                @(posedge i_clk) i_rx_rd <= 1;
+                @(posedge i_clk) i_rx_rd <= 0;
             end
             @(posedge i_clk) i_rx_rd <= 0;
             $display("-------------------------------");
@@ -142,18 +150,22 @@ module uart_top_tb();
         end
     endtask;
 
-// 
-    always@(posedge i_clk) begin
-        
 
-        
-    end
 
 //
     always@(posedge i_clk) begin
         if(o_uart_rx_error) $display("RX ERROR!");
         if(o_fifo_rx_overrun > 0 & i_rx_rd) $display("RX OVERRUN!");
         if(o_fifo_tx_overrun > 0 & i_tx_wr) $display("TX OVERRUN!");
+    end
+
+    always@(posedge i_clk) begin
+        if(!o_rx_empty & i_rx_rd) begin
+            test_expected = test_queue.pop_back();
+            $display("RX FIFO expected:  %b", test_expected);
+            $display("RX FIFO reads:     %b", o_rx_data);
+            $display("");
+        end
     end
 
 // MAIN SIM
@@ -180,7 +192,7 @@ module uart_top_tb();
         end
 
         /*
-        Read 16 bytes and don't read.
+        Read 16 bytes.
         ->
         */
         rxRead(16);
@@ -189,30 +201,28 @@ module uart_top_tb();
         Write 8 bytes and read them back.
         -> expect no errors and for all bytes to be successfully read back
         */
-        txWrite(2);
-        repeat(1*CLKS_PER_BYTE) begin 
+        txWrite(8);
+        repeat(8*CLKS_PER_BYTE) begin 
             @(posedge i_clk); 
         end
-        //rxRead(8);
+        rxRead(8);
 //
-        ///*
-        //Write 20 bytes and don't read.
-        //-> expect 16 bytes to be sent.
-        //-> expect 4 overrun errors.
-        //*/
-        //txWrite(20);
-        //repeat(20*CLKS_PER_BYTE) begin 
-        //    @(posedge i_clk); 
-        //end
-        //
-        ///*
-        //Write 5 more bytes.
-        //-> expect 5 RX FIFO overrun errors.
-        //*/
-        //txWrite(5);
-        //repeat(5*CLKS_PER_BYTE) begin 
-        //    @(posedge i_clk); 
-        //end
+        /*
+        Write 20 bytes, don't read, and don't wait for tx to send more than
+        one byte.
+        -> expect 16 bytes to be sent.
+        -> expect 4 overrun errors.
+        */
+        txWrite(20);
+
+        /*
+        Write 5 more bytes.
+        -> expect 5 RX FIFO overrun errors.
+        */
+        txWrite(5);
+        repeat(16*CLKS_PER_BYTE) begin 
+            @(posedge i_clk); 
+        end
 //
         ///*
         //Empty the RX FIFO.

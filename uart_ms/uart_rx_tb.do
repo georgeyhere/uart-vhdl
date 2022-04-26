@@ -22,7 +22,7 @@ add wave -noupdate /uart_rx_tb/uart_tx_i/i_valid
 add wave -noupdate /uart_rx_tb/uart_tx_i/tx_queue
 add wave -noupdate /uart_rx_tb/uart_tx_i/STATE
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {7551 ps} 0}
+WaveRestoreCursors {{Cursor 1} {86324 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 207
 configure wave -valuecolwidth 100
@@ -38,4 +38,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {4947 ps} {66454 ps}
+WaveRestoreZoom {350765 ps} {351160 ps}

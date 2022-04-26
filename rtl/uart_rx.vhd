@@ -2,7 +2,8 @@
 --
 -- UART RX w/ parameterizable data width and optional parity bit. Only supports one stop bit.
 --
--- When a byte is received, o_valid is asserted for one cycle.
+-- When a byte is received, o_valid is asserted for one cycle. o_valid is asserted EVEN IF
+-- the parity check fails!
 --
 library IEEE;
 use IEEE.std_logic_1164.all;
