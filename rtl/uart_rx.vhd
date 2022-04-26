@@ -41,8 +41,7 @@ end uart_rx;
 
 --
 architecture Behavioral of uart_rx is
-	-- 
-	--constant FRAME_WIDTH : integer := DATA_WIDTH + 2 + PARITY_EN; 
+	--  
     constant FRAME_WIDTH : integer := DATA_WIDTH + PARITY_EN;
 
 	-- FSM state enumeration w/ one-hot encoding
