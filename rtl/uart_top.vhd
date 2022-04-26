@@ -16,8 +16,6 @@ port (
 	i_rstn            : in  std_logic;                  -- synchronous active-low reset
 	
 	-- BAUD GEN CONFIG
-	i_divisor         : in integer range 0 to 2**16-1;  -- 16-bit 1x baud tick clock divider divisor 
-	i_fra_adj         : in integer range 0 to 15;       -- 4-bit 1x baud tick fractional adjustment bits
 	i_divisor_x16     : in integer range 0 to 2**16-1;  -- 16-bit 16x buad tick clock divider divisor
     i_fra_adj_x16     : in integer range 0 to 15;       -- 4-bit 16x baud tick fractional adjustment bits
 
@@ -141,9 +139,6 @@ begin
 	PORT MAP (
 	i_clk         => i_clk,
 	i_rstn        => i_rstn,
-	--
-	i_divisor     => i_divisor,
-	i_fra_adj     => i_fra_adj,
     --
     i_divisor_x16 => i_divisor_x16,
     i_fra_adj_x16 => i_fra_adj_x16,

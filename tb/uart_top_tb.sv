@@ -5,8 +5,6 @@ module uart_top_tb();
     //
     localparam  DIVISOR_X16  = 16'd13;
     localparam  FRA_ADJ_X16  = 4'd6;
-    localparam  DIVISOR_X1   = 16'd217;
-    localparam  FRA_ADJ_X1   = 4'd0;
 
     localparam DATA_WIDTH = 8;
     localparam BAUDGEN_COUNTER_WIDTH = 20;
@@ -59,8 +57,6 @@ module uart_top_tb();
     .i_rstn            (i_rstn),
     
     // baudgen cfg
-    .i_divisor         (DIVISOR_X1),
-    .i_fra_adj         (FRA_ADJ_X1),
     .i_divisor_x16     (DIVISOR_X16),
     .i_fra_adj_x16     (FRA_ADJ_X16),
     

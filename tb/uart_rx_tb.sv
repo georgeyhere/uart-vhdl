@@ -8,8 +8,6 @@ module uart_rx_tb();
 	//
 	localparam  DIVISOR_X16  = 16'd13;
     localparam  FRA_ADJ_X16  = 4'd6;
-    localparam  DIVISOR_X1   = 16'd217;
-    localparam  FRA_ADJ_X1   = 4'd0;
 
 	`ifdef TEST_PARITY
 	localparam PARITY_EN = 1;
@@ -69,9 +67,6 @@ module uart_rx_tb();
     baudgen_i(
     .i_clk         (i_clk),
     .i_rstn        (i_rstn),
-    //    
-    .i_divisor     (DIVISOR_X1),
-    .i_fra_adj     (FRA_ADJ_X1),
     //
     .i_divisor_x16 (DIVISOR_X16),
     .i_fra_adj_x16 (FRA_ADJ_X16),

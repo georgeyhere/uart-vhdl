@@ -34,6 +34,8 @@ architecture Behavioral of uart_demo is
     signal romIndex   : integer range 0 to 31;
     signal romData    : std_logic_vector (7 downto 0);
 
+    signal LED : std_logic_vector(7 downto 0);
+
 begin
 
     uart_tx_fifo_rst <= not(i_rstn);
@@ -95,31 +97,32 @@ begin
     begin
         if rising_edge (i_clk) then
             if(i_rstn = '0') then
-                o_LED <= (others => '0');
+                LED <= (others => '0');
             else
                 case rxData is
                     when "00110000" =>
-                        o_LED(0) <= not(o_LED(0));
+                        LED(0) <= not(LED(0));
                     when "00110001" =>
-                        o_LED(1) <= not(o_LED(1));
+                        LED(1) <= not(LED(1));
                     when "00110010" =>
-                        o_LED(2) <= not(o_LED(2));
+                        LED(2) <= not(LED(2));
                     when "00110011" =>
-                        o_LED(3) <= not(o_LED(3));
+                        LED(3) <= not(LED(3));
                     when "00110100" =>
-                        o_LED(4) <= not(o_LED(4));
+                        LED(4) <= not(LED(4));
                     when "00110101" =>
-                        o_LED(5) <= not(o_LED(5));
+                        LED(5) <= not(LED(5));
                     when "00110110" =>
-                        o_LED(6) <= not(o_LED(6));
+                        LED(6) <= not(LED(6));
                     when "00110111" =>
-                        o_LED(7) <= not(o_LED(7));
+                        LED(7) <= not(LED(7));
                     when others =>
-                        o_LED <= (others => '0');
+                        LED <= (others => '0');
                 end case;
             end if;
         end if;
     end process;
+    o_LED <= LED;
 
 
     charRom_i : entity work.charRom (Behavioral)
@@ -144,8 +147,6 @@ begin
     i_clk  => i_clk,
     i_rstn => i_rstn,
     --
-    i_divisor         => 868,
-    i_fra_adj         => 0,
     i_divisor_x16     => 54,
     i_fra_adj_x16     => 5,
     --    

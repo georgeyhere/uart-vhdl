@@ -65,8 +65,10 @@ begin
                     o_dout <= charToSlv('!');
                 when 17 =>
                     o_dout <= "00001010";
+                when 18 =>
+                    o_dout <= "00001101";
                 when others =>
-                    o_dout <= " ";
+                    o_dout <= charToSlv(' ');
             end case;
         end if;
     end process;

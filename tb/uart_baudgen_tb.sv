@@ -5,8 +5,6 @@ module uart_baudgen_tb();
 	parameter COUNTER_WIDTH = 20;
 	parameter DIVISOR_X16   = 27;
 	parameter FRA_ADJ_x16   = 8;
-    parameter DIVISOR_X1    = 434;
-    parameter FRA_ADJ_X1    = 0;
 
 /* TESTBENCH VARS */
 	// DUT
@@ -40,9 +38,6 @@ module uart_baudgen_tb();
 	DUT (
 	.i_clk         (i_clk),
 	.i_rstn        (i_rstn),
-	//   
-	.i_divisor     (i_divisor),
-	.i_fra_adj     (i_fra_adj),
     //
     .i_divisor_x16 (i_divisor_x16),
     .i_fra_adj_x16 (i_fra_adj_x16),
@@ -86,8 +81,6 @@ module uart_baudgen_tb();
 /* MAIN SIM */
 	initial begin 
 		i_rstn        = 0;
-		i_divisor     = DIVISOR_X1;
-		i_fra_adj     = FRA_ADJ_X1;
         i_divisor_x16 = DIVISOR_X16;
 		i_fra_adj_x16 = FRA_ADJ_x16;
         i_baud_en     = 0;
